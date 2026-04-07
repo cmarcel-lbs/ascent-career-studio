@@ -84,17 +84,17 @@ You must respond with valid JSON using this exact structure (no markdown, no cod
   }
 }`;
 
-    const userPrompt = `Here is the base resume:
+    const userPrompt = `Here is the user's base resume — this contains their REAL experience. You must use this as the source of truth:
 ---
 ${resumeText}
 ---
 
-Here is the job description:
+Here is the job description they are applying to:
 ---
 ${jobDescription}
 ---
 
-Generate a tailored resume, cover letter, and insights analysis. Return ONLY valid JSON.`;
+Tailor the resume above for this specific job. Restructure, reword, and reorder to maximize relevance, but keep all facts from the original resume. Then write a cover letter drawing on their real experience. Return ONLY valid JSON.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
