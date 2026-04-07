@@ -1,11 +1,12 @@
-import { useCallback } from "react";
+import { useCallback, useState } from "react";
 import { useApplicationState } from "@/hooks/useApplicationState";
 import { WelcomeScreen } from "@/components/WelcomeScreen";
 import { InputScreen } from "@/components/InputScreen";
 import { ReferenceScreen } from "@/components/ReferenceScreen";
 import { ProcessingScreen } from "@/components/ProcessingScreen";
 import { ResultsScreen } from "@/components/ResultsScreen";
-import { generateMockResults } from "@/lib/generateResults";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 
 const Index = () => {
   const {
@@ -22,17 +23,46 @@ const Index = () => {
     reset,
   } = useApplicationState();
 
-  const handleProcessingComplete = useCallback(() => {
+  const [error, setError] = useState<string | null>(null);
+
+  const handleStartProcessing = useCallback(async () => {
     if (!state.careerTrack || !state.baseResume) return;
-    const results = generateMockResults(
-      state.careerTrack,
-      state.jobDescription,
-      state.baseResume.name,
-      state.references.length > 0
-    );
-    setResults(results);
-    setStep(4);
-  }, [state.careerTrack, state.baseResume, state.jobDescription, state.references, setResults, setStep]);
+
+    setStep(3);
+    setError(null);
+
+    try {
+      // Read resume file as text
+      const resumeText = await state.baseResume.text();
+
+      const { data, error: fnError } = await supabase.functions.invoke("generate-application", {
+        body: {
+          careerTrack: state.careerTrack,
+          jobDescription: state.jobDescription,
+          resumeText,
+          referenceInfluence: state.referenceInfluence,
+          hasReferences: state.references.length > 0,
+        },
+      });
+
+      if (fnError) {
+        throw new Error(fnError.message || "Failed to generate application materials");
+      }
+
+      if (data?.error) {
+        throw new Error(data.error);
+      }
+
+      setResults(data);
+      setStep(4);
+    } catch (err) {
+      console.error("Generation error:", err);
+      const message = err instanceof Error ? err.message : "An unexpected error occurred";
+      toast.error(message);
+      setError(message);
+      setStep(2); // go back to references screen
+    }
+  }, [state.careerTrack, state.baseResume, state.jobDescription, state.referenceInfluence, state.references, setResults, setStep]);
 
   return (
     <>
@@ -55,12 +85,12 @@ const Index = () => {
           referenceInfluence={state.referenceInfluence}
           onReferencesChange={setReferences}
           onReferenceInfluenceChange={setReferenceInfluence}
-          onNext={nextStep}
-          onSkip={nextStep}
+          onNext={handleStartProcessing}
+          onSkip={handleStartProcessing}
           onBack={prevStep}
         />
       )}
-      {state.step === 3 && <ProcessingScreen onComplete={handleProcessingComplete} />}
+      {state.step === 3 && <ProcessingScreen />}
       {state.step === 4 && state.results && <ResultsScreen results={state.results} onReset={reset} />}
     </>
   );
