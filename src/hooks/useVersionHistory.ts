@@ -50,16 +50,16 @@ export function useVersionHistory() {
       label?: string;
     }) => {
       if (!user) return;
-      const { error } = await supabase.from("application_versions").insert({
+      const { error } = await supabase.from("application_versions").insert([{
         user_id: user.id,
         career_track: params.careerTrack,
         job_description_snippet: params.jobDescription.slice(0, 200),
         resume: params.results.resume,
         cover_letter: params.results.coverLetter,
-        insights: params.results.insights as unknown as Record<string, unknown>,
+        insights: params.results.insights as any,
         reference_influence: params.referenceInfluence,
         version_label: params.label ?? null,
-      });
+      }]);
 
       if (error) {
         toast.error("Failed to save version");
