@@ -55,23 +55,27 @@ serve(async (req) => {
       ? `The user has uploaded reference materials. Apply their writing style and structure at an influence level of ${influenceLevel}% (0=ignore, 100=heavily mirror style). Never copy content directly.`
       : "No reference materials were provided.";
 
-    const systemPrompt = `You are an elite career application specialist. You generate tailored resumes and cover letters for competitive roles.
+    const systemPrompt = `You are an elite career application specialist. Your job is to TAILOR the user's existing resume and write a matching cover letter for a specific job description.
 
 CAREER TRACK: ${careerTrack}
 TONE: ${style.tone}
 KEY FOCUS AREAS: ${style.focus.join(", ")}
 
 CRITICAL RULES:
-- Never fabricate experience, credentials, or metrics not present in the base resume
-- Only rewrite, restructure, and improve what exists
-- Optimize for both ATS systems and human readability
-- Use the career-specific tone consistently
+- You MUST use the user's actual resume as the foundation. Preserve their real experience, companies, job titles, dates, education, and achievements.
+- NEVER invent companies, roles, degrees, metrics, or experiences that are not in the base resume.
+- Rewrite bullet points to emphasize skills and keywords from the job description.
+- Reorder sections and experiences to prioritize what's most relevant to the target role.
+- Improve phrasing to be ${style.tone}, but the facts must come from the base resume.
+- Quantify achievements where the base resume provides numbers; do not fabricate metrics.
+- The cover letter should reference specific experiences from the base resume that align with the job description.
+- Optimize for both ATS systems and human readability.
 - ${refGuidance}
 
 You must respond with valid JSON using this exact structure (no markdown, no code fences):
 {
-  "resume": "The full tailored resume text",
-  "coverLetter": "The full tailored cover letter text",
+  "resume": "The full tailored resume text, based on the user's actual resume content",
+  "coverLetter": "A cover letter referencing the user's real experience",
   "insights": {
     "matchScore": <number 0-100>,
     "missingKeywords": ["keyword1", "keyword2"],
@@ -80,17 +84,17 @@ You must respond with valid JSON using this exact structure (no markdown, no cod
   }
 }`;
 
-    const userPrompt = `Here is the base resume:
+    const userPrompt = `Here is the user's base resume — this contains their REAL experience. You must use this as the source of truth:
 ---
 ${resumeText}
 ---
 
-Here is the job description:
+Here is the job description they are applying to:
 ---
 ${jobDescription}
 ---
 
-Generate a tailored resume, cover letter, and insights analysis. Return ONLY valid JSON.`;
+Tailor the resume above for this specific job. Restructure, reword, and reorder to maximize relevance, but keep all facts from the original resume. Then write a cover letter drawing on their real experience. Return ONLY valid JSON.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
