@@ -7,6 +7,7 @@ const initialState: ApplicationState = {
   baseResume: null,
   jobDescription: "",
   references: [],
+  referenceInfluence: 50,
   results: null,
 };
 
@@ -18,6 +19,7 @@ export function useApplicationState() {
   const setBaseResume = useCallback((baseResume: File | null) => setState((s) => ({ ...s, baseResume })), []);
   const setJobDescription = useCallback((jobDescription: string) => setState((s) => ({ ...s, jobDescription })), []);
   const setReferences = useCallback((references: ReferenceFile[]) => setState((s) => ({ ...s, references })), []);
+  const setReferenceInfluence = useCallback((referenceInfluence: number) => setState((s) => ({ ...s, referenceInfluence })), []);
   const setResults = useCallback((results: GeneratedResults) => setState((s) => ({ ...s, results })), []);
 
   const nextStep = useCallback(() => setState((s) => ({ ...s, step: s.step + 1 })), []);
@@ -32,6 +34,7 @@ export function useApplicationState() {
     setBaseResume,
     setJobDescription,
     setReferences,
+    setReferenceInfluence,
     setResults,
     nextStep,
     prevStep,

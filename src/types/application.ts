@@ -27,6 +27,7 @@ export interface ApplicationState {
   baseResume: File | null;
   jobDescription: string;
   references: ReferenceFile[];
+  referenceInfluence: number; // 0-100
   results: GeneratedResults | null;
 }
 
