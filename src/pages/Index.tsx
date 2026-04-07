@@ -1,74 +1,73 @@
 import { useCallback, useState } from "react";
-import { AnimatePresence } from "framer-motion";
-import { useApplicationState } from "@/hooks/useApplicationState";
+import { AnimatePresence, motion } from "framer-motion";
 import { useAuth } from "@/hooks/useAuth";
+import { useWorkspaceState } from "@/hooks/useWorkspaceState";
 import { useVersionHistory } from "@/hooks/useVersionHistory";
 import { AuthScreen } from "@/components/AuthScreen";
-import { WelcomeScreen } from "@/components/WelcomeScreen";
-import { InputScreen } from "@/components/InputScreen";
-import { ReferenceScreen } from "@/components/ReferenceScreen";
-import { ProcessingScreen } from "@/components/ProcessingScreen";
-import { ResultsScreen } from "@/components/ResultsScreen";
+import { TrackWorkspace } from "@/components/TrackWorkspace";
+import { TrackResults } from "@/components/TrackResults";
 import { VersionHistoryPanel } from "@/components/VersionHistoryPanel";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
-import { Clock, LogOut } from "lucide-react";
+import { Clock, LogOut, Briefcase, TrendingUp, Rocket, Box, BarChart3 } from "lucide-react";
 import { Button } from "@/components/ui/button";
+import { ScrollArea } from "@/components/ui/scroll-area";
+import { CAREER_TRACKS, type CareerTrack } from "@/types/application";
 import type { GeneratedResults } from "@/types/application";
+
+const TRACK_ICONS: Record<CareerTrack, React.ElementType> = {
+  "investment-banking": Briefcase,
+  "private-equity": TrendingUp,
+  "venture-capital": Rocket,
+  "product-management": Box,
+  "growth-strategy": BarChart3,
+};
 
 const Index = () => {
   const { user, loading: authLoading, signOut } = useAuth();
-  const {
-    state, setStep, setCareerTrack, setBaseResume, setJobDescription,
-    setReferences, setReferenceInfluence, setResults, nextStep, prevStep, reset,
-  } = useApplicationState();
-
+  const { state, activeTrack, activeState, setActiveTrack, updateTrack, resetTrack } = useWorkspaceState();
   const { versions, loading: versionsLoading, saveVersion, deleteVersion } = useVersionHistory();
-  const [error, setError] = useState<string | null>(null);
   const [showHistory, setShowHistory] = useState(false);
 
-  const handleStartProcessing = useCallback(async () => {
-    if (!state.careerTrack || !state.baseResume) return;
-    setStep(3);
-    setError(null);
+  const handleGenerate = useCallback(async () => {
+    const track = activeTrack;
+    const ts = state.tracks[track];
+    if (!ts.baseResume) return;
+
+    updateTrack(track, { isProcessing: true });
 
     try {
-      const resumeText = await state.baseResume.text();
+      const resumeText = await ts.baseResume.text();
       const { data, error: fnError } = await supabase.functions.invoke("generate-application", {
         body: {
-          careerTrack: state.careerTrack,
-          jobDescription: state.jobDescription,
+          careerTrack: track,
+          jobDescription: ts.jobDescription,
           resumeText,
-          referenceInfluence: state.referenceInfluence,
-          hasReferences: state.references.length > 0,
+          referenceInfluence: ts.referenceInfluence,
+          hasReferences: ts.references.length > 0,
         },
       });
 
-      if (fnError) throw new Error(fnError.message || "Failed to generate application materials");
+      if (fnError) throw new Error(fnError.message || "Failed to generate");
       if (data?.error) throw new Error(data.error);
 
-      setResults(data);
-      setStep(4);
+      updateTrack(track, { results: data, isProcessing: false });
 
-      // Auto-save version
       await saveVersion({
-        careerTrack: state.careerTrack,
-        jobDescription: state.jobDescription,
+        careerTrack: track,
+        jobDescription: ts.jobDescription,
         results: data,
-        referenceInfluence: state.referenceInfluence,
+        referenceInfluence: ts.referenceInfluence,
       });
     } catch (err) {
       console.error("Generation error:", err);
-      const message = err instanceof Error ? err.message : "An unexpected error occurred";
-      toast.error(message);
-      setError(message);
-      setStep(2);
+      toast.error(err instanceof Error ? err.message : "An unexpected error occurred");
+      updateTrack(track, { isProcessing: false });
     }
-  }, [state.careerTrack, state.baseResume, state.jobDescription, state.referenceInfluence, state.references, setResults, setStep, saveVersion]);
+  }, [activeTrack, state.tracks, updateTrack, saveVersion]);
 
   const handleLoadVersion = (results: GeneratedResults) => {
-    setResults(results);
-    setStep(4);
+    updateTrack(activeTrack, { results });
     setShowHistory(false);
   };
 
@@ -83,60 +82,106 @@ const Index = () => {
   if (!user) return <AuthScreen />;
 
   return (
-    <>
-      {/* Top bar */}
-      <div className="fixed top-0 right-0 z-40 flex items-center gap-2 p-4">
-        <Button
-          variant="outline"
-          size="sm"
-          className="gap-1.5 border-border text-muted-foreground hover:text-foreground"
-          onClick={() => setShowHistory(true)}
-        >
-          <Clock className="h-3.5 w-3.5" />
-          History
-          {versions.length > 0 && (
-            <span className="ml-1 text-xs bg-accent text-accent-foreground rounded-full px-1.5 py-0.5 leading-none">
-              {versions.length}
-            </span>
-          )}
-        </Button>
-        <Button
-          variant="ghost"
-          size="sm"
-          className="gap-1.5 text-muted-foreground hover:text-foreground"
-          onClick={signOut}
-        >
-          <LogOut className="h-3.5 w-3.5" />
-        </Button>
-      </div>
+    <div className="min-h-screen flex">
+      {/* Sidebar */}
+      <aside className="w-64 shrink-0 border-r border-border bg-card/50 flex flex-col">
+        <div className="p-5 border-b border-border">
+          <div className="flex items-center gap-2">
+            <span className="h-2 w-2 rounded-full bg-accent" />
+            <span className="text-xs font-semibold tracking-widest text-muted-foreground uppercase">Career Studio</span>
+          </div>
+        </div>
 
-      {state.step === 0 && <WelcomeScreen onStart={nextStep} />}
-      {state.step === 1 && (
-        <InputScreen
-          careerTrack={state.careerTrack}
-          baseResume={state.baseResume}
-          jobDescription={state.jobDescription}
-          onCareerTrackChange={setCareerTrack}
-          onResumeChange={setBaseResume}
-          onJobDescriptionChange={setJobDescription}
-          onNext={nextStep}
-          onBack={prevStep}
-        />
-      )}
-      {state.step === 2 && (
-        <ReferenceScreen
-          references={state.references}
-          referenceInfluence={state.referenceInfluence}
-          onReferencesChange={setReferences}
-          onReferenceInfluenceChange={setReferenceInfluence}
-          onNext={handleStartProcessing}
-          onSkip={handleStartProcessing}
-          onBack={prevStep}
-        />
-      )}
-      {state.step === 3 && <ProcessingScreen />}
-      {state.step === 4 && state.results && <ResultsScreen results={state.results} onReset={reset} />}
+        <nav className="flex-1 p-3 space-y-1">
+          {CAREER_TRACKS.map((t) => {
+            const Icon = TRACK_ICONS[t.value];
+            const isActive = activeTrack === t.value;
+            const hasResults = !!state.tracks[t.value].results;
+            return (
+              <button
+                key={t.value}
+                onClick={() => setActiveTrack(t.value)}
+                className={`w-full flex items-center gap-3 px-3 py-2.5 rounded-lg text-sm transition-colors text-left ${
+                  isActive
+                    ? "bg-primary text-primary-foreground"
+                    : "text-muted-foreground hover:text-foreground hover:bg-secondary/60"
+                }`}
+              >
+                <Icon className="h-4 w-4 shrink-0" />
+                <span className="truncate flex-1">{t.label}</span>
+                {hasResults && (
+                  <span className={`h-1.5 w-1.5 rounded-full shrink-0 ${isActive ? "bg-primary-foreground/60" : "bg-accent"}`} />
+                )}
+              </button>
+            );
+          })}
+        </nav>
 
+        <div className="p-3 border-t border-border space-y-1">
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+            onClick={() => setShowHistory(true)}
+          >
+            <Clock className="h-4 w-4" />
+            History
+            {versions.length > 0 && (
+              <span className="ml-auto text-[10px] bg-accent text-accent-foreground rounded-full px-1.5 py-0.5 leading-none">
+                {versions.length}
+              </span>
+            )}
+          </Button>
+          <Button
+            variant="ghost"
+            size="sm"
+            className="w-full justify-start gap-2 text-muted-foreground hover:text-foreground"
+            onClick={signOut}
+          >
+            <LogOut className="h-4 w-4" />
+            Sign Out
+          </Button>
+        </div>
+      </aside>
+
+      {/* Main Content */}
+      <main className="flex-1 min-h-screen">
+        <ScrollArea className="h-screen">
+          <div className="max-w-2xl mx-auto px-8 py-10">
+            <motion.div
+              key={activeTrack}
+              initial={{ opacity: 0, y: 8 }}
+              animate={{ opacity: 1, y: 0 }}
+              transition={{ duration: 0.25 }}
+            >
+              <div className="mb-8">
+                <h2 className="text-2xl font-semibold text-foreground mb-1">
+                  {CAREER_TRACKS.find((t) => t.value === activeTrack)?.label}
+                </h2>
+                <p className="text-sm text-muted-foreground">
+                  Upload your resume, paste the job description, and generate tailored application materials.
+                </p>
+              </div>
+
+              {activeState.results ? (
+                <TrackResults
+                  results={activeState.results}
+                  onReset={() => resetTrack(activeTrack)}
+                  onRegenerate={handleGenerate}
+                />
+              ) : (
+                <TrackWorkspace
+                  trackState={activeState}
+                  onUpdate={(patch) => updateTrack(activeTrack, patch)}
+                  onGenerate={handleGenerate}
+                />
+              )}
+            </motion.div>
+          </div>
+        </ScrollArea>
+      </main>
+
+      {/* Version History Panel */}
       <AnimatePresence>
         {showHistory && (
           <VersionHistoryPanel
@@ -148,7 +193,7 @@ const Index = () => {
           />
         )}
       </AnimatePresence>
-    </>
+    </div>
   );
 };
 
