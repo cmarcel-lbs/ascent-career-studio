@@ -3,11 +3,14 @@ import { motion } from "framer-motion";
 import { Upload, FileText, X, ArrowLeft, ArrowRight, SkipForward } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
+import { Slider } from "@/components/ui/slider";
 import type { ReferenceFile, ReferenceTag } from "@/types/application";
 
 interface ReferenceScreenProps {
   references: ReferenceFile[];
+  referenceInfluence: number;
   onReferencesChange: (refs: ReferenceFile[]) => void;
+  onReferenceInfluenceChange: (value: number) => void;
   onNext: () => void;
   onSkip: () => void;
   onBack: () => void;
@@ -19,7 +22,7 @@ const TAG_OPTIONS: { value: ReferenceTag; label: string }[] = [
   { value: "general-reference", label: "General Reference" },
 ];
 
-export function ReferenceScreen({ references, onReferencesChange, onNext, onSkip, onBack }: ReferenceScreenProps) {
+export function ReferenceScreen({ references, referenceInfluence, onReferencesChange, onReferenceInfluenceChange, onNext, onSkip, onBack }: ReferenceScreenProps) {
   const fileInputRef = useRef<HTMLInputElement>(null);
 
   const handleFiles = (e: React.ChangeEvent<HTMLInputElement>) => {
@@ -91,6 +94,27 @@ export function ReferenceScreen({ references, onReferencesChange, onNext, onSkip
           <span className="text-sm text-muted-foreground">Click to upload reference documents</span>
           <span className="text-xs text-muted-foreground/60">PDF, DOC, DOCX, or TXT — multiple files allowed</span>
         </button>
+
+        {references.length > 0 && (
+          <div className="mb-8 p-4 rounded-lg border border-border bg-card">
+            <div className="flex items-center justify-between mb-2">
+              <span className="text-sm font-medium text-foreground">Reference Influence</span>
+              <span className="text-sm tabular-nums text-muted-foreground">{referenceInfluence}%</span>
+            </div>
+            <Slider
+              value={[referenceInfluence]}
+              onValueChange={([v]) => onReferenceInfluenceChange(v)}
+              min={0}
+              max={100}
+              step={5}
+              className="w-full"
+            />
+            <div className="flex justify-between mt-1.5">
+              <span className="text-xs text-muted-foreground/60">Less influence</span>
+              <span className="text-xs text-muted-foreground/60">More influence</span>
+            </div>
+          </div>
+        )}
 
         <div className="flex gap-3">
           <Button
