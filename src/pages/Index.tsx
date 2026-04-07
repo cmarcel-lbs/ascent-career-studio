@@ -15,6 +15,7 @@ const Index = () => {
     setBaseResume,
     setJobDescription,
     setReferences,
+    setReferenceInfluence,
     setResults,
     nextStep,
     prevStep,
@@ -51,7 +52,9 @@ const Index = () => {
       {state.step === 2 && (
         <ReferenceScreen
           references={state.references}
+          referenceInfluence={state.referenceInfluence}
           onReferencesChange={setReferences}
+          onReferenceInfluenceChange={setReferenceInfluence}
           onNext={nextStep}
           onSkip={nextStep}
           onBack={prevStep}
