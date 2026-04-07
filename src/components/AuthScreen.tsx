@@ -5,7 +5,8 @@ import { Input } from "@/components/ui/input";
 import { supabase } from "@/integrations/supabase/client";
 import { lovable } from "@/integrations/lovable/index";
 import { toast } from "sonner";
-import { Mail, Lock, ArrowRight, Loader2, Separator } from "lucide-react";
+import { Mail, Lock, ArrowRight, Loader2 } from "lucide-react";
+import { Separator } from "@/components/ui/separator";
 
 export function AuthScreen() {
   const [isLogin, setIsLogin] = useState(true);
