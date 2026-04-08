@@ -18,6 +18,7 @@ interface TrackResultsProps {
 export function TrackResults({ results, onReset, onRegenerate }: TrackResultsProps) {
   const [resume, setResume] = useState(results.resume);
   const [coverLetter, setCoverLetter] = useState(results.coverLetter);
+  const [applicationEmail, setApplicationEmail] = useState(results.applicationEmail || "");
 
   const copyToClipboard = (text: string, label: string) => {
     navigator.clipboard.writeText(text);
@@ -50,6 +51,7 @@ export function TrackResults({ results, onReset, onRegenerate }: TrackResultsPro
         <TabsList className="bg-secondary/60 border border-border p-1 mb-4 w-full">
           <TabsTrigger value="resume" className="flex-1 data-[state=active]:bg-card data-[state=active]:text-foreground text-muted-foreground text-xs">Resume</TabsTrigger>
           <TabsTrigger value="cover-letter" className="flex-1 data-[state=active]:bg-card data-[state=active]:text-foreground text-muted-foreground text-xs">Cover Letter</TabsTrigger>
+          <TabsTrigger value="email" className="flex-1 data-[state=active]:bg-card data-[state=active]:text-foreground text-muted-foreground text-xs">Email</TabsTrigger>
           <TabsTrigger value="insights" className="flex-1 data-[state=active]:bg-card data-[state=active]:text-foreground text-muted-foreground text-xs">Insights</TabsTrigger>
         </TabsList>
 
@@ -88,6 +90,24 @@ export function TrackResults({ results, onReset, onRegenerate }: TrackResultsPro
                 <Copy className="h-3 w-3" /> Copy
               </Button>
               <Button size="sm" variant="outline" className="gap-1 text-xs border-border" onClick={() => downloadText(coverLetter, "cover-letter.txt")}>
+                <Download className="h-3 w-3" /> Download
+              </Button>
+            </div>
+          </div>
+        </TabsContent>
+
+        <TabsContent value="email">
+          <div className="rounded-lg border border-border bg-card p-4">
+            <Textarea
+              value={applicationEmail}
+              onChange={(e) => setApplicationEmail(e.target.value)}
+              className="min-h-[250px] bg-transparent border-0 p-0 resize-none text-xs leading-relaxed focus-visible:ring-0"
+            />
+            <div className="flex flex-wrap gap-2 mt-4 pt-4 border-t border-border">
+              <Button size="sm" variant="outline" className="gap-1 text-xs border-border" onClick={() => copyToClipboard(applicationEmail, "Application email")}>
+                <Copy className="h-3 w-3" /> Copy
+              </Button>
+              <Button size="sm" variant="outline" className="gap-1 text-xs border-border" onClick={() => downloadText(applicationEmail, "application-email.txt")}>
                 <Download className="h-3 w-3" /> Download
               </Button>
             </div>
