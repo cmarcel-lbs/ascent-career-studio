@@ -11,6 +11,7 @@ export interface SupportingMaterial {
 export interface TrackState {
   baseResume: File | null;
   jobDescription: string;
+  additionalContext: string;
   supportingMaterials: SupportingMaterial[];
   references: ReferenceFile[];
   referenceInfluence: number;
@@ -35,6 +36,7 @@ export function createEmptyTrackState(): TrackState {
   return {
     baseResume: null,
     jobDescription: "",
+    additionalContext: "",
     supportingMaterials: [],
     references: [],
     referenceInfluence: 50,

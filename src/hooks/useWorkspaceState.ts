@@ -28,7 +28,7 @@ export function useWorkspaceState() {
       updateTrack(track, {
         baseResume: null,
         jobDescription: "",
-        supportingMaterials: [],
+        additionalContext: "",
         references: [],
         referenceInfluence: 50,
         results: null,
