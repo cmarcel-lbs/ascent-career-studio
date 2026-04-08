@@ -26,8 +26,21 @@ PRIORITIZE: Financial analysis, valuation, transaction support, strategic analys
 - Focus on fit, preparation, and relevance. No generic enthusiasm.`,
   },
   "private-equity": {
-    tone: "analytical, investor-minded, and deal-focused",
-    focus: ["portfolio management", "due diligence", "value creation", "LBO modeling"],
+    tone: "analytical, selective, investor-minded, crisp, and commercially aware",
+    focus: ["investing mindset", "deal exposure", "diligence", "financial analysis", "operational value creation", "business model assessment", "market and competitive analysis", "portfolio and strategic thinking"],
+    styleRules: `STYLE RULES:
+- Analytical, selective, and investor-minded. Crisp and commercially aware.
+- Slightly more evaluative than investment banking — focus on judgment, diligence, value drivers, and business quality.
+- Keep wording concise and mature.
+- Avoid sounding like general corporate strategy unless the experience clearly points there.
+- De-emphasize generic project management, high-level strategy language without commercial substance, and excessive enthusiasm or startup-style informality.
+
+PRIORITIZE: Investing mindset, deal exposure, diligence, financial analysis, operational value creation, business model assessment, market and competitive analysis, portfolio or strategic thinking, evidence of strong judgment and pattern recognition.`,
+    coverLetterTone: `COVER LETTER TONE:
+- Focused, credible, selective.
+- Show why the candidate can think like an investor.
+- Emphasize analytical maturity and ability to assess businesses.
+- No generic enthusiasm — demonstrate judgment and commercial awareness.`,
   },
   "venture-capital": {
     tone: "market-aware, thoughtful, and startup-oriented",
