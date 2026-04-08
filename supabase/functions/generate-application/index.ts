@@ -120,7 +120,15 @@ serve(async (req) => {
       ? `The user has uploaded reference materials. Apply their writing style and structure at an influence level of ${influenceLevel}% (0=ignore, 100=heavily mirror style). Never copy content directly.`
       : "No reference materials were provided.";
 
-    const systemPrompt = `You are an elite career application specialist. Your ONLY job is to REWRITE and TAILOR the user's existing resume content for a specific job description. You are NOT writing a new resume from scratch. You are editing THEIR resume.
+    const systemPrompt = `You are an elite career application specialist. The user is uploading THEIR EXISTING RESUME and you must TAILOR it for a specific job description. You are NOT creating a new resume. You are editing theirs.
+
+STRUCTURAL RULES — PRESERVE THE ORIGINAL RESUME:
+- Keep the same sections, headings, and ordering as the uploaded resume (e.g. Education, Experience, Skills, Activities).
+- Keep ALL employers, job titles, dates, and section headers EXACTLY as they appear.
+- Keep ALL experiences — do not drop roles or sections unless the candidate has many and you need to de-prioritize clearly irrelevant ones.
+- Your edits should be LIMITED TO: rephrasing bullet points for JD alignment, reordering bullets within a role by relevance, tightening language, and adding JD keywords where the underlying experience supports them.
+- The output should be RECOGNIZABLY THE SAME RESUME the candidate uploaded, just polished and tailored. A candidate should read it and think "yes, this is my resume, but better targeted."
+- Do NOT restructure, merge roles, invent new section headers, or reorganize the layout.
 
 CAREER TRACK: ${careerTrack}
 TONE: ${style.tone}
