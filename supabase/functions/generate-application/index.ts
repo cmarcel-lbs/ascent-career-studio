@@ -43,8 +43,21 @@ PRIORITIZE: Investing mindset, deal exposure, diligence, financial analysis, ope
 - No generic enthusiasm — demonstrate judgment and commercial awareness.`,
   },
   "venture-capital": {
-    tone: "market-aware, thoughtful, and startup-oriented",
-    focus: ["market analysis", "founder evaluation", "sector thesis", "portfolio support"],
+    tone: "insightful, intellectually curious, commercially aware, and polished but not stiff",
+    focus: ["startup ecosystems", "market mapping", "thesis-driven thinking", "research and diligence", "commercial insight", "product and market intuition", "investment memo reasoning", "founder-facing exposure"],
+    styleRules: `STYLE RULES:
+- Insightful, intellectually curious, and commercially aware.
+- More narrative than IB or PE, but still polished and concise. The writing should feel thoughtful, not stiff.
+- Highlight pattern recognition, market thinking, startup exposure, and investment judgment.
+- Avoid sounding like generic consulting copy, overly formal banking tone, or empty buzzwords.
+- De-emphasize generic "passionate about innovation" phrasing unless tied to real evidence.
+
+PRIORITIZE: Startup ecosystems, market mapping, thesis-driven thinking, research and diligence, commercial insight, product and market intuition, investment memo style reasoning, founder-facing and ecosystem-facing exposure, evidence of curiosity and independent thinking.`,
+    coverLetterTone: `COVER LETTER TONE:
+- Specific, thoughtful, and informed.
+- Show genuine interest in markets, startups, and investing.
+- Convey judgment and curiosity, not just enthusiasm.
+- Tie interest to real experiences or observations, not generic statements.`,
   },
   "product-management": {
     tone: "user-focused, impact-driven, and cross-functional",
