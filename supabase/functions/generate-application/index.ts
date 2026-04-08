@@ -75,6 +75,8 @@ CAREER TRACK: ${careerTrack}
 TONE: ${style.tone}
 KEY FOCUS AREAS: ${style.focus.join(", ")}
 
+${style.styleRules || ""}
+
 CRITICAL RULES:
 - You MUST use the user's actual resume as the foundation. Preserve their real experience, companies, job titles, dates, education, and achievements.
 - NEVER invent companies, roles, degrees, metrics, or experiences that are not in the base resume.
@@ -82,9 +84,10 @@ CRITICAL RULES:
 - Reorder sections and experiences to prioritize what's most relevant to the target role.
 - Improve phrasing to be ${style.tone}, but the facts must come from the base resume.
 - Quantify achievements where the base resume provides numbers; do not fabricate metrics.
-- The cover letter should reference specific experiences from the base resume that align with the job description.
 - Optimize for both ATS systems and human readability.
 - ${refGuidance}
+
+${style.coverLetterTone || "The cover letter should reference specific experiences from the base resume that align with the job description."}
 
 You must respond with valid JSON using this exact structure (no markdown, no code fences):
 {
