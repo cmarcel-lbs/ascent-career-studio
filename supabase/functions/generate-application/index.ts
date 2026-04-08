@@ -156,6 +156,10 @@ You must respond with valid JSON using this exact structure (no markdown, no cod
       ? `\n\nThe following supporting materials provide additional context about the role, company, or team. Use this to better understand the position and tailor the application more precisely:\n---\n${supportingContext}\n---`
       : "";
 
+    const additionalSection = additionalContext?.trim()
+      ? `\n\nThe user has provided additional experiences and context that may NOT be in their resume. You MAY incorporate these if they are relevant to the target role. Treat them as real experiences the user has had:\n---\n${additionalContext.trim()}\n---`
+      : "";
+
     const userPrompt = `Here is the user's base resume — this contains their REAL experience. You must use this as the source of truth:
 ---
 ${resumeText}
@@ -164,9 +168,9 @@ ${resumeText}
 Here is the job description they are applying to:
 ---
 ${jobDescription}
----${supportingSection}
+---${supportingSection}${additionalSection}
 
-Tailor the resume above for this specific job. Restructure, reword, and reorder to maximize relevance, but keep all facts from the original resume. Then write a cover letter drawing on their real experience. Return ONLY valid JSON.`;
+Tailor the resume above for this specific job. Restructure, reword, and reorder to maximize relevance, but keep all facts from the original resume (and any additional context provided). Then write a cover letter drawing on their real experience. Return ONLY valid JSON.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
