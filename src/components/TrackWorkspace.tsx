@@ -117,7 +117,21 @@ export function TrackWorkspace({ trackState, onUpdate, onGenerate }: TrackWorksp
         />
       </section>
 
-      {/* Supporting Materials */}
+      {/* Additional Context */}
+      <section>
+        <h3 className="text-sm font-medium text-foreground mb-1">Additional Context</h3>
+        <p className="text-xs text-muted-foreground mb-3">
+          Add relevant experiences, projects, or details not in your resume that could strengthen the application.
+        </p>
+        <Textarea
+          value={additionalContext}
+          onChange={(e) => onUpdate({ additionalContext: e.target.value })}
+          placeholder="E.g. 'Led a due diligence workstream on a $200M carve-out that isn't on my resume yet…' or 'Completed CFA Level II, relevant coursework in LBO modeling…'"
+          className="min-h-[100px] bg-card border-border resize-none text-sm"
+        />
+      </section>
+
+
       <section>
         <h3 className="text-sm font-medium text-foreground mb-1">Supporting Materials</h3>
         <p className="text-xs text-muted-foreground mb-3">
