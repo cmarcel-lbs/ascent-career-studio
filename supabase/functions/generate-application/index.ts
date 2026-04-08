@@ -128,24 +128,62 @@ KEY FOCUS AREAS: ${style.focus.join(", ")}
 
 ${style.styleRules || ""}
 
-CRITICAL RULES:
-- You MUST use the user's actual resume as the foundation. Preserve their real experience, companies, job titles, dates, education, and achievements.
-- NEVER invent companies, roles, degrees, metrics, or experiences that are not in the base resume.
-- Rewrite bullet points to emphasize skills and keywords from the job description.
-- Reorder sections and experiences to prioritize what's most relevant to the target role.
-- Improve phrasing to be ${style.tone}, but the facts must come from the base resume.
-- Quantify achievements where the base resume provides numbers; do not fabricate metrics.
-- Optimize for both ATS systems and human readability.
+ABSOLUTE GROUNDING RULES — VIOLATIONS ARE UNACCEPTABLE:
+
+The BASE RESUME (and the optional ADDITIONAL CONTEXT section) are the ONLY permitted sources of factual claims. Every single fact in your output must trace back to one of these two sources. If it does not, remove it.
+
+You must NEVER invent, fabricate, embellish, or infer ANY of the following:
+- Employers, company names, or organizations not in the base resume or additional context
+- Job titles or roles not in the base resume or additional context
+- Bullet points describing work the candidate did not describe
+- Transactions, deals, or engagements not mentioned by the candidate
+- Metrics, numbers, dollar amounts, percentages, or quantities not explicitly stated
+- Tools, software, platforms, or technologies not listed by the candidate
+- Client names or client types not mentioned
+- Skills or competencies the candidate did not claim
+- Outcomes, results, or achievements not supported by the source material
+- Certifications, degrees, coursework, or credentials not listed
+- Dates, durations, or timelines not provided
+
+WHAT YOU MAY DO:
+- Reword and rephrase existing bullet points to align with JD keywords and the career track tone
+- Reorder sections and experiences to prioritize relevance to the target role
+- Combine or split existing bullets for clarity, as long as no new facts are introduced
+- Add JD-relevant keywords as descriptors ONLY when the underlying experience genuinely supports them
+- Remove or de-emphasize experiences that are irrelevant to the target role
+- Improve grammar, conciseness, and professional polish
+
+WHAT THE JOB DESCRIPTION IS FOR:
+- Guiding which experiences to emphasize or de-emphasize
+- Informing keyword alignment and phrasing
+- It is NOT a source of candidate facts — never transfer JD requirements into the resume as if the candidate has done them
+
+WHAT REFERENCE FILES ARE FOR:
 - ${refGuidance}
+- References guide tone, structure, formatting, and style ONLY
+- They are NOT a source of candidate facts
 
 ${style.coverLetterTone || "The cover letter should reference specific experiences from the base resume that align with the job description."}
 
+COVER LETTER GROUNDING:
+- Every claim in the cover letter must be traceable to the base resume or additional context
+- Do not attribute experiences, skills, or achievements the candidate has not described
+- It is acceptable to express enthusiasm and fit, but specific claims must be grounded
+
+APPLICATION EMAIL:
 You must also write a short, professional application email the candidate can use to submit their materials. If the job description or supporting materials include specific application instructions (e.g. email subject line, required attachments, who to address), follow them precisely. Otherwise, write a concise email suitable for sending a resume and cover letter to a recruiter or hiring manager.
+
+SECOND-PASS VALIDATION (YOU MUST PERFORM THIS BEFORE RESPONDING):
+After drafting the resume, cover letter, and email, review every line of your output against the base resume and additional context. For each factual claim ask: "Is this explicitly stated or directly supported by the source material?" If the answer is no, REMOVE or REWRITE the claim. This includes:
+- Implied metrics (e.g., turning "helped with analysis" into "$50M+ analysis")
+- Assumed tools or technologies
+- Inferred job responsibilities not described by the candidate
+- Fabricated outcomes or results
 
 You must respond with valid JSON using this exact structure (no markdown, no code fences):
 {
-  "resume": "The full tailored resume text, based on the user's actual resume content",
-  "coverLetter": "A cover letter referencing the user's real experience",
+  "resume": "The full tailored resume text, grounded entirely in the base resume and additional context",
+  "coverLetter": "A cover letter referencing only the candidate's real, documented experience",
   "applicationEmail": "A short email to accompany the application submission, following any JD instructions",
   "insights": {
     "matchScore": <number 0-100>,
@@ -156,24 +194,24 @@ You must respond with valid JSON using this exact structure (no markdown, no cod
 }`;
 
     const supportingSection = supportingContext
-      ? `\n\nThe following supporting materials provide additional context about the role, company, or team. Use this to better understand the position and tailor the application more precisely:\n---\n${supportingContext}\n---`
+      ? `\n\nThe following supporting materials provide additional context about the role, company, or team. Use this ONLY to better understand the position and tailor the application — NOT as a source of candidate facts:\n---\n${supportingContext}\n---`
       : "";
 
     const additionalSection = additionalContext?.trim()
-      ? `\n\nThe user has provided additional experiences and context that may NOT be in their resume. You MAY incorporate these if they are relevant to the target role. Treat them as real experiences the user has had:\n---\n${additionalContext.trim()}\n---`
+      ? `\n\nADDITIONAL CONTEXT (off-resume experiences the candidate has confirmed are real). You MAY incorporate these if relevant to the target role. These are a permitted source of facts alongside the base resume:\n---\n${additionalContext.trim()}\n---`
       : "";
 
-    const userPrompt = `Here is the user's base resume — this contains their REAL experience. You must use this as the source of truth:
+    const userPrompt = `Here is the user's BASE RESUME — this is the primary source of truth for all factual claims. Every employer, title, bullet, metric, tool, skill, and credential in your output must come from this document (or the additional context section if provided):
 ---
 ${resumeText}
 ---
 
-Here is the job description they are applying to:
+Here is the JOB DESCRIPTION the candidate is applying to. Use this ONLY for tailoring emphasis, keyword alignment, and understanding what the role requires — NOT as a source of candidate facts:
 ---
 ${jobDescription}
 ---${supportingSection}${additionalSection}
 
-Tailor the resume above for this specific job. Restructure, reword, and reorder to maximize relevance, but keep all facts from the original resume (and any additional context provided). Then write a cover letter drawing on their real experience. Return ONLY valid JSON.`;
+Tailor the resume for this specific job. Restructure, reword, and reorder to maximize relevance, but every fact must trace back to the base resume or additional context. Perform the second-pass validation before responding. Return ONLY valid JSON.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
