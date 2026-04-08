@@ -1,8 +1,17 @@
 import type { CareerTrack, ReferenceFile, GeneratedResults } from "@/types/application";
 
+export interface SupportingMaterial {
+  id: string;
+  type: "file" | "link";
+  file?: File;
+  url?: string;
+  label: string;
+}
+
 export interface TrackState {
   baseResume: File | null;
   jobDescription: string;
+  supportingMaterials: SupportingMaterial[];
   references: ReferenceFile[];
   referenceInfluence: number;
   results: GeneratedResults | null;
@@ -26,6 +35,7 @@ export function createEmptyTrackState(): TrackState {
   return {
     baseResume: null,
     jobDescription: "",
+    supportingMaterials: [],
     references: [],
     referenceInfluence: 50,
     results: null,
