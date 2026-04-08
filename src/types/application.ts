@@ -34,6 +34,7 @@ export interface ApplicationState {
 export interface GeneratedResults {
   resume: string;
   coverLetter: string;
+  applicationEmail: string;
   insights: {
     matchScore: number;
     missingKeywords: string[];

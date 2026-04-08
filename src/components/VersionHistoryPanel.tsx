@@ -82,6 +82,7 @@ export function VersionHistoryPanel({ versions, loading, onLoadVersion, onDelete
                       onClick={() => onLoadVersion({
                         resume: v.resume,
                         coverLetter: v.cover_letter,
+                        applicationEmail: "",
                         insights,
                       })}
                     >

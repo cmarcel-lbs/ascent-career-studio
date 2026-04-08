@@ -87,6 +87,7 @@ Sincerely,
   return {
     resume,
     coverLetter,
+    applicationEmail: "",
     insights: {
       matchScore,
       missingKeywords: missingKeywords.length > 0 ? missingKeywords : ["leadership development", "stakeholder management"],
