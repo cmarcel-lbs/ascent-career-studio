@@ -100,7 +100,7 @@ serve(async (req) => {
   }
 
   try {
-    const { careerTrack, jobDescription, resumeText, referenceInfluence, hasReferences } = await req.json();
+    const { careerTrack, jobDescription, resumeText, supportingContext, referenceInfluence, hasReferences } = await req.json();
 
     if (!careerTrack || !jobDescription || !resumeText) {
       return new Response(
@@ -152,6 +152,10 @@ You must respond with valid JSON using this exact structure (no markdown, no cod
   }
 }`;
 
+    const supportingSection = supportingContext
+      ? `\n\nThe following supporting materials provide additional context about the role, company, or team. Use this to better understand the position and tailor the application more precisely:\n---\n${supportingContext}\n---`
+      : "";
+
     const userPrompt = `Here is the user's base resume — this contains their REAL experience. You must use this as the source of truth:
 ---
 ${resumeText}
@@ -160,7 +164,7 @@ ${resumeText}
 Here is the job description they are applying to:
 ---
 ${jobDescription}
----
+---${supportingSection}
 
 Tailor the resume above for this specific job. Restructure, reword, and reorder to maximize relevance, but keep all facts from the original resume. Then write a cover letter drawing on their real experience. Return ONLY valid JSON.`;
 

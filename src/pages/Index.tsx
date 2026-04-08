@@ -38,11 +38,27 @@ const Index = () => {
 
     try {
       const resumeText = await ts.baseResume.text();
+
+      // Extract text from supporting file materials
+      const supportingTexts: string[] = [];
+      for (const mat of ts.supportingMaterials) {
+        if (mat.type === "file" && mat.file) {
+          try {
+            const text = await mat.file.text();
+            if (text.trim()) supportingTexts.push(`[File: ${mat.label}]\n${text}`);
+          } catch { /* skip binary files */ }
+        } else if (mat.type === "link" && mat.url) {
+          supportingTexts.push(`[Link: ${mat.url}]`);
+        }
+      }
+      const supportingContext = supportingTexts.length > 0 ? supportingTexts.join("\n\n---\n\n") : "";
+
       const { data, error: fnError } = await supabase.functions.invoke("generate-application", {
         body: {
           careerTrack: track,
           jobDescription: ts.jobDescription,
           resumeText,
+          supportingContext,
           referenceInfluence: ts.referenceInfluence,
           hasReferences: ts.references.length > 0,
         },
