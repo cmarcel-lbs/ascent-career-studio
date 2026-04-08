@@ -58,6 +58,7 @@ const Index = () => {
           careerTrack: track,
           jobDescription: ts.jobDescription,
           resumeText,
+          additionalContext: ts.additionalContext || "",
           supportingContext,
           referenceInfluence: ts.referenceInfluence,
           hasReferences: ts.references.length > 0,

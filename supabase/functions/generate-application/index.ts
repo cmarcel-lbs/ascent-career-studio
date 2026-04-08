@@ -100,7 +100,7 @@ serve(async (req) => {
   }
 
   try {
-    const { careerTrack, jobDescription, resumeText, supportingContext, referenceInfluence, hasReferences } = await req.json();
+    const { careerTrack, jobDescription, resumeText, additionalContext, supportingContext, referenceInfluence, hasReferences } = await req.json();
 
     if (!careerTrack || !jobDescription || !resumeText) {
       return new Response(
