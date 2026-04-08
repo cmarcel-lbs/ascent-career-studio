@@ -60,8 +60,21 @@ PRIORITIZE: Startup ecosystems, market mapping, thesis-driven thinking, research
 - Tie interest to real experiences or observations, not generic statements.`,
   },
   "product-management": {
-    tone: "user-focused, impact-driven, and cross-functional",
-    focus: ["product strategy", "user research", "roadmap planning", "stakeholder alignment"],
+    tone: "clear, structured, user-oriented, outcome-driven, and execution-focused",
+    focus: ["product impact", "user problems", "roadmap and prioritization decisions", "cross-functional collaboration", "experimentation", "product launches", "stakeholder alignment", "data-informed decision making", "iteration and delivery"],
+    styleRules: `STYLE RULES:
+- Clear, structured, user-oriented, and outcome-driven.
+- Emphasize ownership, decision-making, prioritization, and cross-functional collaboration.
+- Highlight product outcomes over task lists. Use metrics and impact where possible.
+- Make the candidate sound thoughtful, practical, and execution-oriented.
+- De-emphasize overly finance-heavy or investment-heavy framing unless directly relevant, generic leadership wording, and abstract strategy with no user or business outcome.
+
+PRIORITIZE: Product impact, user problems, roadmap or prioritization decisions, cross-functional collaboration, experimentation, product launches, stakeholder alignment, data-informed decision making, iteration and delivery.`,
+    coverLetterTone: `COVER LETTER TONE:
+- Practical, informed, and product-minded.
+- Show why the candidate understands product work.
+- Emphasize users, outcomes, and ownership.
+- Tie claims to specific product decisions or results.`,
   },
   "growth-strategy": {
     tone: "analytics-driven, GTM-focused, and business-impact oriented",
