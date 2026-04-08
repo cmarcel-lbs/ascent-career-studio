@@ -6,10 +6,24 @@ const corsHeaders = {
     "authorization, x-client-info, apikey, content-type, x-supabase-client-platform, x-supabase-client-platform-version, x-supabase-client-runtime, x-supabase-client-runtime-version",
 };
 
-const CAREER_STYLES: Record<string, { tone: string; focus: string[] }> = {
+const CAREER_STYLES: Record<string, { tone: string; focus: string[]; styleRules?: string; coverLetterTone?: string }> = {
   "investment-banking": {
-    tone: "concise, technical, and metrics-driven",
-    focus: ["deal experience", "financial modeling", "valuation", "transaction advisory"],
+    tone: "extremely concise, high-signal, metrics-forward, and polished",
+    focus: ["financial analysis", "valuation", "transaction support", "strategic analysis", "client-facing work", "executive presentations"],
+    styleRules: `STYLE RULES:
+- Extremely concise. High signal, low fluff.
+- Direct and polished. Bullets should feel sharp, efficient, and achievement-oriented.
+- Metrics-forward wherever supported by the resume.
+- Emphasize transaction experience, finance, execution, and client exposure when relevant.
+- Avoid long narrative phrasing, soft/vague language, and overly promotional tone.
+- De-emphasize generic teamwork language, broad corporate jargon, excessive storytelling, and unsubstantiated leadership claims.
+
+PRIORITIZE: Financial analysis, valuation, transaction support, strategic analysis, client-facing work, executive presentations, cross-functional execution in demanding environments, analytical rigor, evidence of ownership and precision.`,
+    coverLetterTone: `COVER LETTER TONE:
+- Highly tailored to the specific bank/team/role.
+- Professional and deliberate. Motivated but restrained.
+- Specific about why this bank, this team, this role.
+- Focus on fit, preparation, and relevance. No generic enthusiasm.`,
   },
   "private-equity": {
     tone: "analytical, investor-minded, and deal-focused",
