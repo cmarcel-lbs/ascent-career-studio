@@ -140,10 +140,13 @@ CRITICAL RULES:
 
 ${style.coverLetterTone || "The cover letter should reference specific experiences from the base resume that align with the job description."}
 
+You must also write a short, professional application email the candidate can use to submit their materials. If the job description or supporting materials include specific application instructions (e.g. email subject line, required attachments, who to address), follow them precisely. Otherwise, write a concise email suitable for sending a resume and cover letter to a recruiter or hiring manager.
+
 You must respond with valid JSON using this exact structure (no markdown, no code fences):
 {
   "resume": "The full tailored resume text, based on the user's actual resume content",
   "coverLetter": "A cover letter referencing the user's real experience",
+  "applicationEmail": "A short email to accompany the application submission, following any JD instructions",
   "insights": {
     "matchScore": <number 0-100>,
     "missingKeywords": ["keyword1", "keyword2"],
