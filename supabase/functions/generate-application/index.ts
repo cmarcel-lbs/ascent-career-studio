@@ -220,7 +220,7 @@ IMPORTANT REMINDER: You are EDITING the resume above — not writing a new one. 
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-2.5-pro",
+        model: "google/gemini-2.5-flash",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
