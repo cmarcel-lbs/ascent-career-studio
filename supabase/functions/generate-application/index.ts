@@ -120,7 +120,7 @@ serve(async (req) => {
       ? `The user has uploaded reference materials. Apply their writing style and structure at an influence level of ${influenceLevel}% (0=ignore, 100=heavily mirror style). Never copy content directly.`
       : "No reference materials were provided.";
 
-    const systemPrompt = `You are an elite career application specialist. Your job is to TAILOR the user's existing resume and write a matching cover letter for a specific job description.
+    const systemPrompt = `You are an elite career application specialist. Your ONLY job is to REWRITE and TAILOR the user's existing resume content for a specific job description. You are NOT writing a new resume from scratch. You are editing THEIR resume.
 
 CAREER TRACK: ${careerTrack}
 TONE: ${style.tone}
@@ -211,7 +211,7 @@ Here is the JOB DESCRIPTION the candidate is applying to. Use this ONLY for tail
 ${jobDescription}
 ---${supportingSection}${additionalSection}
 
-Tailor the resume for this specific job. Restructure, reword, and reorder to maximize relevance, but every fact must trace back to the base resume or additional context. Perform the second-pass validation before responding. Return ONLY valid JSON.`;
+IMPORTANT REMINDER: You are EDITING the resume above — not writing a new one. The output resume must contain ONLY employers, titles, dates, bullets, metrics, and skills that appear in the base resume or additional context above. If a fact does not appear in those sections, it MUST NOT appear in your output. Do not generate placeholder company names like "[Company]" or "[University]" — use the ACTUAL names from the resume. Perform the second-pass validation before responding. Return ONLY valid JSON.`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
@@ -220,7 +220,7 @@ Tailor the resume for this specific job. Restructure, reword, and reorder to max
         "Content-Type": "application/json",
       },
       body: JSON.stringify({
-        model: "google/gemini-3-flash-preview",
+        model: "google/gemini-2.5-pro",
         messages: [
           { role: "system", content: systemPrompt },
           { role: "user", content: userPrompt },
