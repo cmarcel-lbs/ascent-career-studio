@@ -27,7 +27,7 @@ export function TrackWorkspace({ trackState, onUpdate, onGenerate }: TrackWorksp
   const [linkInput, setLinkInput] = useState("");
   const [showLinkInput, setShowLinkInput] = useState(false);
 
-  const { baseResume, jobDescription, supportingMaterials, references, referenceInfluence, isProcessing } = trackState;
+  const { baseResume, jobDescription, additionalContext, supportingMaterials, references, referenceInfluence, isProcessing } = trackState;
   const isValid = baseResume && jobDescription.trim().length > 20;
 
   const handleResumeChange = (e: React.ChangeEvent<HTMLInputElement>) => {
