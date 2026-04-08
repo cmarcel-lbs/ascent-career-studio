@@ -77,8 +77,20 @@ PRIORITIZE: Product impact, user problems, roadmap or prioritization decisions, 
 - Tie claims to specific product decisions or results.`,
   },
   "growth-strategy": {
-    tone: "analytics-driven, GTM-focused, and business-impact oriented",
-    focus: ["growth analytics", "market expansion", "conversion optimization", "strategic planning"],
+    tone: "analytical, commercially minded, structured, and execution-oriented",
+    focus: ["growth initiatives", "GTM strategy", "market analysis", "revenue and funnel improvement", "experimentation", "cross-functional problem solving", "strategic planning", "KPI ownership", "business performance improvement"],
+    styleRules: `STYLE RULES:
+- Analytical, commercially minded, and structured.
+- Blend strategic thinking with measurable execution.
+- Highlight business impact, experimentation, GTM logic, and decision support.
+- Keep language polished and direct. Avoid sounding purely academic or purely operational.
+- De-emphasize generic operations language, purely tactical task descriptions, and vague strategy without measurable outcomes.
+
+PRIORITIZE: Growth initiatives, GTM strategy, market analysis, revenue or funnel improvement, experimentation, cross-functional problem solving, strategic planning, KPI ownership, business performance improvement.`,
+    coverLetterTone: `COVER LETTER TONE:
+- Commercial, sharp, and pragmatic.
+- Show structured thinking and measurable impact.
+- Explain fit through business judgment and execution ability.`,
   },
 };
 
