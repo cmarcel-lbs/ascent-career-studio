@@ -17,7 +17,7 @@ import { toast } from "sonner";
 
 interface Props {
   onNavigateToJob: (jobId: string) => void;
-  onNavigateToStudio: (jobDescription?: string) => void;
+  onNavigateToStudio: (jobDescription?: string, mode?: "resume" | "cover-letter") => void;
 }
 
 export function JobsFeedPage({ onNavigateToJob, onNavigateToStudio }: Props) {
