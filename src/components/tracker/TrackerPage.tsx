@@ -1,10 +1,23 @@
-import { useMemo, useState, useRef, DragEvent } from "react";
+import { useMemo, useState, useRef, DragEvent, useEffect } from "react";
 import { useJobs } from "@/hooks/useJobs";
+import { useAuth } from "@/hooks/useAuth";
 import { CAREER_TRACKS } from "@/types/application";
 import type { ApplicationStatus, JobApplication, Job } from "@/types/jobs";
 import { Card, CardContent } from "@/components/ui/card";
 import { Badge } from "@/components/ui/badge";
 import { ScrollArea } from "@/components/ui/scroll-area";
+import { Button } from "@/components/ui/button";
+import { Input } from "@/components/ui/input";
+import { Label } from "@/components/ui/label";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { supabase } from "@/integrations/supabase/client";
+import { toast } from "sonner";
 import {
   Star,
   Send,
@@ -14,6 +27,10 @@ import {
   XCircle,
   Inbox,
   GripVertical,
+  Link2,
+  RefreshCw,
+  Upload,
+  Download,
 } from "lucide-react";
 
 const STATUS_COLUMNS: {
@@ -34,10 +51,21 @@ interface Props {
   onNavigateToJob: (jobId: string) => void;
 }
 
+const NOTION_TOKEN_KEY = "ascent_notion_token";
+const NOTION_DB_KEY = "ascent_notion_db_id";
+
 export function TrackerPage({ onNavigateToJob }: Props) {
-  const { jobs, applications, updateApplication, loading } = useJobs();
-  const [draggedAppId, setDraggedAppId] = useState<string | null>(null);
+  const { jobs, applications, updateApplication, loading, refetch } = useJobs();
+  const { user } = useAuth();
+  const [draggedId, setDraggedId] = useState<string | null>(null);
   const [dragOverColumn, setDragOverColumn] = useState<ApplicationStatus | null>(null);
+
+  // Notion sync state
+  const [showNotionSetup, setShowNotionSetup] = useState(false);
+  const [notionToken, setNotionToken] = useState(() => localStorage.getItem(NOTION_TOKEN_KEY) || "");
+  const [notionDbId, setNotionDbId] = useState(() => localStorage.getItem(NOTION_DB_KEY) || "");
+  const [notionSyncing, setNotionSyncing] = useState(false);
+  const isNotionConfigured = !!(notionToken && notionDbId);
 
   const columns = useMemo(() => {
     const grouped: Record<ApplicationStatus, (JobApplication & { job?: Job })[]> = {
@@ -61,10 +89,73 @@ export function TrackerPage({ onNavigateToJob }: Props) {
 
   const totalApps = applications.length;
 
-  const handleDragStart = (e: DragEvent, appJobId: string, currentStatus: ApplicationStatus) => {
-    setDraggedAppId(appJobId);
+  const saveNotionConfig = () => {
+    localStorage.setItem(NOTION_TOKEN_KEY, notionToken);
+    localStorage.setItem(NOTION_DB_KEY, notionDbId);
+    setShowNotionSetup(false);
+    toast.success("Notion connected");
+  };
+
+  const notionSync = async (direction: "push" | "pull") => {
+    if (!isNotionConfigured || !user) {
+      setShowNotionSetup(true);
+      return;
+    }
+    setNotionSyncing(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("notion-sync", {
+        body: {
+          action: direction,
+          userId: user.id,
+          notionToken,
+          notionDatabaseId: notionDbId,
+        },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      if (direction === "push") {
+        toast.success(`Pushed ${data.synced} application${data.synced !== 1 ? "s" : ""} to Notion`);
+      } else {
+        toast.success(`Pulled ${data.updated} status update${data.updated !== 1 ? "s" : ""} from Notion`);
+        await refetch();
+      }
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Notion sync failed");
+    } finally {
+      setNotionSyncing(false);
+    }
+  };
+
+  // Auto push to Notion on status change
+  const handleUpdateWithSync = async (jobId: string, updates: Parameters<typeof updateApplication>[1], app: JobApplication & { job?: Job }) => {
+    await updateApplication(jobId, updates);
+    if (isNotionConfigured && updates.status && user) {
+      try {
+        await supabase.functions.invoke("notion-sync", {
+          body: {
+            action: "push-single",
+            notionToken,
+            notionDatabaseId: notionDbId,
+            application: {
+              jobId,
+              status: updates.status,
+              jobTitle: app.job?.title || "Unknown Role",
+              company: app.job?.company || "",
+              jobTrack: app.job?.career_track || "",
+              notes: app.notes || "",
+            },
+          },
+        });
+      } catch {
+        // Non-blocking — don't show error for background sync
+      }
+    }
+  };
+
+  const handleDragStart = (e: DragEvent, appId: string, jobId: string, currentStatus: ApplicationStatus) => {
+    setDraggedId(appId);
     e.dataTransfer.effectAllowed = "move";
-    e.dataTransfer.setData("text/plain", JSON.stringify({ jobId: appJobId, from: currentStatus }));
+    e.dataTransfer.setData("text/plain", JSON.stringify({ appId, jobId, from: currentStatus }));
   };
 
   const handleDragOver = (e: DragEvent, status: ApplicationStatus) => {
@@ -80,18 +171,20 @@ export function TrackerPage({ onNavigateToJob }: Props) {
   const handleDrop = async (e: DragEvent, targetStatus: ApplicationStatus) => {
     e.preventDefault();
     setDragOverColumn(null);
-    setDraggedAppId(null);
+    setDraggedId(null);
 
     try {
       const data = JSON.parse(e.dataTransfer.getData("text/plain"));
       if (data.from !== targetStatus) {
-        await updateApplication(data.jobId, { status: targetStatus });
+        const draggedApp = applications.find((a) => a.id === data.appId);
+        const draggedJob = jobs.find((j) => j.id === data.jobId);
+        await handleUpdateWithSync(data.jobId, { status: targetStatus }, { ...draggedApp!, job: draggedJob });
       }
     } catch {}
   };
 
   const handleDragEnd = () => {
-    setDraggedAppId(null);
+    setDraggedId(null);
     setDragOverColumn(null);
   };
 
@@ -106,10 +199,45 @@ export function TrackerPage({ onNavigateToJob }: Props) {
   return (
     <div className="h-full flex flex-col px-8 py-10">
       <div className="mb-6 shrink-0">
-        <h1 className="text-3xl font-semibold text-foreground mb-1">Application Tracker</h1>
-        <p className="text-sm text-muted-foreground">
-          {totalApps} application{totalApps !== 1 ? "s" : ""} across all stages
-        </p>
+        <div className="flex items-start justify-between">
+          <div>
+            <h1 className="text-3xl font-semibold text-foreground mb-1">Application Tracker</h1>
+            <p className="text-sm text-muted-foreground">
+              {totalApps} application{totalApps !== 1 ? "s" : ""} across all stages
+            </p>
+          </div>
+          <div className="flex items-center gap-2">
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-xs"
+              onClick={() => notionSync("pull")}
+              disabled={notionSyncing}
+            >
+              <Download className="h-3.5 w-3.5" />
+              Pull from Notion
+            </Button>
+            <Button
+              variant="outline"
+              size="sm"
+              className="gap-1.5 text-xs"
+              onClick={() => notionSync("push")}
+              disabled={notionSyncing}
+            >
+              <Upload className="h-3.5 w-3.5" />
+              Push to Notion
+            </Button>
+            <Button
+              variant={isNotionConfigured ? "ghost" : "secondary"}
+              size="sm"
+              className="gap-1.5 text-xs"
+              onClick={() => setShowNotionSetup(true)}
+            >
+              <Link2 className="h-3.5 w-3.5" />
+              {isNotionConfigured ? "Notion ✓" : "Connect Notion"}
+            </Button>
+          </div>
+        </div>
       </div>
 
       {totalApps === 0 ? (
@@ -154,12 +282,12 @@ export function TrackerPage({ onNavigateToJob }: Props) {
                   <ScrollArea className="flex-1 px-2 pb-2">
                     <div className="space-y-2">
                       {items.map((app) => {
-                        const isDragging = draggedAppId === app.job_id;
+                        const isDragging = draggedId === app.id;
                         return (
                           <Card
                             key={app.id}
                             draggable
-                            onDragStart={(e) => handleDragStart(e, app.job_id, col.value)}
+                            onDragStart={(e) => handleDragStart(e, app.id, app.job_id, col.value)}
                             onDragEnd={handleDragEnd}
                             className={`cursor-grab active:cursor-grabbing hover:shadow-sm transition-all ${
                               isDragging ? "opacity-40 scale-95" : ""
@@ -213,6 +341,61 @@ export function TrackerPage({ onNavigateToJob }: Props) {
           </div>
         </div>
       )}
+    </div>
+
+      {/* Notion Setup Dialog */}
+      <Dialog open={showNotionSetup} onOpenChange={setShowNotionSetup}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Connect Notion</DialogTitle>
+            <DialogDescription>
+              Sync your tracker with a Notion database. You need an Internal Integration Token and the Database ID.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <Label className="text-xs">Integration Token</Label>
+              <Input
+                type="password"
+                placeholder="secret_xxxxxxxxxxxx"
+                value={notionToken}
+                onChange={(e) => setNotionToken(e.target.value)}
+                className="font-mono text-xs"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Create at notion.so/my-integrations → New integration → Internal. Grant it access to your database.
+              </p>
+            </div>
+            <div className="space-y-1.5">
+              <Label className="text-xs">Database ID</Label>
+              <Input
+                placeholder="xxxxxxxxxxxxxxxxxxxxxxxxxxxxxxxx"
+                value={notionDbId}
+                onChange={(e) => setNotionDbId(e.target.value)}
+                className="font-mono text-xs"
+              />
+              <p className="text-[11px] text-muted-foreground">
+                Found in your Notion database URL: notion.so/workspace/<strong>DATABASE_ID</strong>?v=...
+              </p>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-3 text-[11px] text-muted-foreground space-y-1">
+              <p className="font-medium text-foreground">Required Notion database properties:</p>
+              <p>• <code>Name</code> (title) — Job title</p>
+              <p>• <code>Company</code> (text) — Company name</p>
+              <p>• <code>Status</code> (select) — Interested / Applying / Applied / Interviewing / Offer / Rejected</p>
+              <p>• <code>Career Track</code> (select) — Track name</p>
+              <p>• <code>Job ID</code> (text) — Internal ID (auto-managed)</p>
+              <p>• <code>Notes</code> (text, optional)</p>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="ghost" size="sm" onClick={() => setShowNotionSetup(false)}>Cancel</Button>
+              <Button size="sm" onClick={saveNotionConfig} disabled={!notionToken || !notionDbId}>
+                Save & Connect
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
