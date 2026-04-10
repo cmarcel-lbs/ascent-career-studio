@@ -205,6 +205,10 @@ export function JobsFeedPage({ onNavigateToJob, onNavigateToStudio }: Props) {
           <h1 className="text-3xl font-semibold text-foreground mb-1">Jobs</h1>
           <p className="text-sm text-muted-foreground">{sortedJobs.length} jobs across all tracks</p>
         </div>
+        <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowImportDialog(true)}>
+          <Globe className="h-3.5 w-3.5" />
+          Import from URL
+        </Button>
       </div>
 
       {/* Search Bar */}
