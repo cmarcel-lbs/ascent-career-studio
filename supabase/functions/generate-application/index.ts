@@ -100,7 +100,7 @@ serve(async (req) => {
   }
 
   try {
-    const { careerTrack, jobDescription, resumeText, additionalContext, supportingContext, referenceInfluence, hasReferences } = await req.json();
+    const { careerTrack, jobDescription, resumeText, additionalContext, supportingContext, referencesText, referenceInfluence, hasReferences } = await req.json();
 
     if (!careerTrack || !jobDescription || !resumeText) {
       return new Response(
@@ -116,7 +116,9 @@ serve(async (req) => {
 
     const style = CAREER_STYLES[careerTrack] || CAREER_STYLES["product-management"];
     const influenceLevel = referenceInfluence ?? 50;
-    const refGuidance = hasReferences
+    const refGuidance = hasReferences && referencesText
+      ? `The user has uploaded reference materials (shown below). Apply their writing style and structure at an influence level of ${influenceLevel}% (0=ignore, 100=heavily mirror style). Use them ONLY to guide tone, formatting, and style — NEVER copy their factual content.`
+      : hasReferences
       ? `The user has uploaded reference materials. Apply their writing style and structure at an influence level of ${influenceLevel}% (0=ignore, 100=heavily mirror style). Never copy content directly.`
       : "No reference materials were provided.";
 
@@ -209,6 +211,10 @@ You must respond with valid JSON using this exact structure (no markdown, no cod
       ? `\n\nADDITIONAL CONTEXT (off-resume experiences the candidate has confirmed are real). You MAY incorporate these if relevant to the target role. These are a permitted source of facts alongside the base resume:\n---\n${additionalContext.trim()}\n---`
       : "";
 
+    const referencesSection = referencesText?.trim()
+      ? `\n\nREFERENCE MATERIALS (for style/tone/formatting guidance ONLY — NOT a source of candidate facts):\n---\n${referencesText.trim()}\n---`
+      : "";
+
     const userPrompt = `Here is the user's BASE RESUME — this is the primary source of truth for all factual claims. Every employer, title, bullet, metric, tool, skill, and credential in your output must come from this document (or the additional context section if provided):
 ---
 ${resumeText}
@@ -219,7 +225,7 @@ Here is the JOB DESCRIPTION the candidate is applying to. Use this ONLY for tail
 ${jobDescription}
 ---${supportingSection}${additionalSection}
 
-IMPORTANT REMINDER: You are EDITING the resume above — not writing a new one. The output resume must contain ONLY employers, titles, dates, bullets, metrics, and skills that appear in the base resume or additional context above. If a fact does not appear in those sections, it MUST NOT appear in your output. Do not generate placeholder company names like "[Company]" or "[University]" — use the ACTUAL names from the resume. Perform the second-pass validation before responding. Return ONLY valid JSON.`;
+IMPORTANT REMINDER: You are EDITING the resume above — not writing a new one. The output resume must contain ONLY employers, titles, dates, bullets, metrics, and skills that appear in the base resume or additional context above. If a fact does not appear in those sections, it MUST NOT appear in your output. Do not generate placeholder company names like "[Company]" or "[University]" — use the ACTUAL names from the resume. Perform the second-pass validation before responding. Return ONLY valid JSON.${referencesSection}`;
 
     const response = await fetch("https://ai.gateway.lovable.dev/v1/chat/completions", {
       method: "POST",
