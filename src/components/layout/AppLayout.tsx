@@ -39,6 +39,8 @@ export function AppLayout() {
   const [currentPage, setCurrentPage] = useState<Page>("dashboard");
   const [selectedJobId, setSelectedJobId] = useState<string | null>(null);
   const [collapsed, setCollapsed] = useState(false);
+  const [studioJobDescription, setStudioJobDescription] = useState<string | undefined>(undefined);
+  const [studioMode, setStudioMode] = useState<"resume" | "cover-letter">("resume");
 
   const navigateToJob = (jobId: string) => {
     setSelectedJobId(jobId);
@@ -50,7 +52,9 @@ export function AppLayout() {
     setCurrentPage("jobs");
   };
 
-  const navigateToStudio = (jobDescription?: string) => {
+  const navigateToStudio = (jobDescription?: string, mode: "resume" | "cover-letter" = "resume") => {
+    setStudioJobDescription(jobDescription);
+    setStudioMode(mode);
     setCurrentPage("studio");
   };
 
@@ -71,7 +75,7 @@ export function AppLayout() {
       case "resumes":
         return <ResumesPage />;
       case "studio":
-        return <StudioPage />;
+        return <StudioPage prefillJobDescription={studioJobDescription} initialMode={studioMode} />;
       case "tracker":
         return <TrackerPage onNavigateToJob={navigateToJob} />;
       default:
