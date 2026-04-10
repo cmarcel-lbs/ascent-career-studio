@@ -353,20 +353,35 @@ export function JobsFeedPage({ onNavigateToJob, onNavigateToStudio }: Props) {
           <div className="space-y-4 pt-2">
             <div className="space-y-1.5">
               <label className="text-xs font-medium text-foreground">Source / Board Type</label>
-              <Select value={importSource} onValueChange={setImportSource}>
+              <Select
+                value={importSource}
+                onValueChange={(v) => {
+                  setImportSource(v);
+                  const preset: Record<string, string> = {
+                    LinkedIn: "https://www.linkedin.com/jobs/search/?keywords=",
+                    Indeed: "https://www.indeed.com/jobs?q=",
+                    Greenhouse: "https://boards.greenhouse.io/",
+                    Lever: "https://jobs.lever.co/",
+                    Workday: "https://www.myworkdayjobs.com/",
+                    AngelList: "https://wellfound.com/jobs",
+                    Glassdoor: "https://www.glassdoor.com/Job/jobs.htm?sc.keyword=",
+                  };
+                  if (preset[v]) setImportUrl(preset[v]);
+                }}
+              >
                 <SelectTrigger className="h-9 text-xs">
                   <SelectValue placeholder="Select source type" />
                 </SelectTrigger>
                 <SelectContent>
-                  <SelectItem value="auto">Auto-detect</SelectItem>
-                  <SelectItem value="LinkedIn">LinkedIn</SelectItem>
+                  <SelectItem value="auto">Auto-detect (paste any URL)</SelectItem>
+                  <SelectItem value="LinkedIn">LinkedIn Jobs</SelectItem>
                   <SelectItem value="Indeed">Indeed</SelectItem>
                   <SelectItem value="Greenhouse">Greenhouse</SelectItem>
                   <SelectItem value="Lever">Lever</SelectItem>
                   <SelectItem value="Workday">Workday</SelectItem>
-                  <SelectItem value="Company Website">Company Website</SelectItem>
                   <SelectItem value="AngelList">AngelList / Wellfound</SelectItem>
                   <SelectItem value="Glassdoor">Glassdoor</SelectItem>
+                  <SelectItem value="Company Website">Company Website</SelectItem>
                   <SelectItem value="Other">Other</SelectItem>
                 </SelectContent>
               </Select>
@@ -383,12 +398,11 @@ export function JobsFeedPage({ onNavigateToJob, onNavigateToStudio }: Props) {
                   className="pl-10 font-mono text-xs"
                 />
               </div>
-            </div>
-            <div className="bg-muted/50 rounded-lg p-3 text-[11px] text-muted-foreground space-y-1">
-              <p className="font-medium text-foreground">Tips for best results:</p>
-              <p>• Use search results pages with multiple listings</p>
-              <p>• Company career pages (e.g. greenhouse.io/company)</p>
-              <p>• Individual job posting URLs also work</p>
+              <p className="text-[11px] text-muted-foreground">
+                {importSource === "auto"
+                  ? "Paste any job board or career page URL."
+                  : "Complete the URL above with your search terms or company name."}
+              </p>
             </div>
             <div className="flex gap-2 justify-end">
               <Button variant="ghost" size="sm" onClick={() => setShowImportDialog(false)}>
