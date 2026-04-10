@@ -338,6 +338,59 @@ export function JobsFeedPage({ onNavigateToJob, onNavigateToStudio }: Props) {
           ))}
         </div>
       )}
+
+      {/* Import from URL Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Import Jobs from URL</DialogTitle>
+            <DialogDescription>
+              Paste a job board or career page URL to scrape and import real job listings.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <div className="relative">
+                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="https://boards.greenhouse.io/company or LinkedIn jobs URL..."
+                  value={importUrl}
+                  onChange={(e) => setImportUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleImportFromUrl()}
+                  className="pl-10 font-mono text-xs"
+                />
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Works with LinkedIn, Indeed, Greenhouse, Lever, company career pages, and more.
+              </p>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-3 text-[11px] text-muted-foreground space-y-1">
+              <p className="font-medium text-foreground">Tips for best results:</p>
+              <p>• Use search results pages with multiple listings</p>
+              <p>• Company career pages (e.g. greenhouse.io/company)</p>
+              <p>• Individual job posting URLs also work</p>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="ghost" size="sm" onClick={() => setShowImportDialog(false)}>
+                Cancel
+              </Button>
+              <Button size="sm" onClick={handleImportFromUrl} disabled={importing || !importUrl.trim()}>
+                {importing ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                    Scraping...
+                  </>
+                ) : (
+                  <>
+                    <Globe className="h-3.5 w-3.5 mr-1.5" />
+                    Import Jobs
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
