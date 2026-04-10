@@ -12,7 +12,16 @@ export function scoreJob(
   profile: UserProfile | null,
   resumes: StoredResume[]
 ): MatchResult {
-  let score = 50; // baseline
+  // If user has no profile or resumes, return a neutral placeholder
+  const hasProfileSignal = (profile?.hard_skills?.length ?? 0) > 0 ||
+    (profile?.preferred_career_tracks?.length ?? 0) > 0 ||
+    resumes.length > 0;
+
+  if (!hasProfileSignal) {
+    return { score: 0, summary: "Complete your Profile and upload a Resume to see your match score.", gaps: [], bestResume: null };
+  }
+
+  let score = 30; // baseline — meaningful signal required to rise above this
   const gaps: string[] = [];
   const reasons: string[] = [];
 
