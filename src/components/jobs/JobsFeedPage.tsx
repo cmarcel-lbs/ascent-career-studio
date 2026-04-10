@@ -38,6 +38,7 @@ export function JobsFeedPage({ onNavigateToJob, onNavigateToStudio }: Props) {
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [importUrl, setImportUrl] = useState("");
   const [importing, setImporting] = useState(false);
+  const [importSource, setImportSource] = useState("auto");
 
   const handleImportFromUrl = useCallback(async () => {
     if (!importUrl.trim()) return;
