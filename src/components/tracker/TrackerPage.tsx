@@ -341,7 +341,6 @@ export function TrackerPage({ onNavigateToJob }: Props) {
           </div>
         </div>
       )}
-    </div>
 
       {/* Notion Setup Dialog */}
       <Dialog open={showNotionSetup} onOpenChange={setShowNotionSetup}>
