@@ -35,6 +35,19 @@ export function ProfilePage() {
     }
   }, [profile]);
 
+  const hasChanges = profile ? (
+    summary !== profile.summary ||
+    JSON.stringify(targetLocations) !== JSON.stringify(profile.target_locations) ||
+    JSON.stringify(targetSeniority) !== JSON.stringify(profile.target_seniority) ||
+    JSON.stringify(targetIndustries) !== JSON.stringify(profile.target_industries) ||
+    JSON.stringify(preferredFunctions) !== JSON.stringify(profile.preferred_functions) ||
+    JSON.stringify(hardSkills) !== JSON.stringify(profile.hard_skills) ||
+    JSON.stringify(excludedJobTypes) !== JSON.stringify(profile.excluded_job_types) ||
+    JSON.stringify(preferredTracks) !== JSON.stringify(profile.preferred_career_tracks)
+  ) : (
+    summary.length > 0 || hardSkills.length > 0 || targetLocations.length > 0
+  );
+
   const handleSave = async () => {
     setSaving(true);
     await saveProfile({
@@ -65,7 +78,7 @@ export function ProfilePage() {
           <h1 className="text-3xl font-semibold text-foreground mb-1">Profile</h1>
           <p className="text-sm text-muted-foreground">Define your career preferences to improve job matching.</p>
         </div>
-        <Button onClick={handleSave} disabled={saving}>
+        <Button onClick={handleSave} disabled={saving || !hasChanges}>
           {saving ? <Loader2 className="h-4 w-4 mr-2 animate-spin" /> : <Save className="h-4 w-4 mr-2" />}
           Save Profile
         </Button>
