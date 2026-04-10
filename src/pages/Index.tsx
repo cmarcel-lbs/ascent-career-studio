@@ -14,6 +14,7 @@ import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
 import { CAREER_TRACKS, type CareerTrack } from "@/types/application";
 import type { GeneratedResults } from "@/types/application";
+import { extractFileText } from "@/lib/extractFileText";
 
 const TRACK_ICONS: Record<CareerTrack, React.ElementType> = {
   "investment-banking": Briefcase,
@@ -37,21 +38,45 @@ const Index = () => {
     updateTrack(track, { isProcessing: true });
 
     try {
-      const resumeText = await ts.baseResume.text();
+      // --- Extract base resume text (PDF/DOCX/TXT aware) ---
+      let resumeText: string;
+      try {
+        resumeText = await extractFileText(ts.baseResume);
+      } catch (err) {
+        throw new Error(`Resume extraction failed: ${err instanceof Error ? err.message : "Unknown error"}. Please try uploading a .txt version of your resume.`);
+      }
 
-      // Extract text from supporting file materials
+      if (!resumeText || resumeText.length < 50) {
+        throw new Error("Your resume file appears to be empty or unreadable. Please try a .txt or different .pdf export.");
+      }
+
+      // --- Extract text from supporting file materials (PDF/DOCX/TXT aware) ---
       const supportingTexts: string[] = [];
       for (const mat of ts.supportingMaterials) {
         if (mat.type === "file" && mat.file) {
           try {
-            const text = await mat.file.text();
+            const text = await extractFileText(mat.file);
             if (text.trim()) supportingTexts.push(`[File: ${mat.label}]\n${text}`);
-          } catch { /* skip binary files */ }
+          } catch {
+            // Non-critical — skip unreadable supporting files silently
+          }
         } else if (mat.type === "link" && mat.url) {
           supportingTexts.push(`[Link: ${mat.url}]`);
         }
       }
       const supportingContext = supportingTexts.length > 0 ? supportingTexts.join("\n\n---\n\n") : "";
+
+      // --- Extract text from reference files (PDF/DOCX/TXT aware) ---
+      const referenceTexts: string[] = [];
+      for (const ref of ts.references) {
+        try {
+          const text = await extractFileText(ref.file);
+          if (text.trim()) referenceTexts.push(`[Reference (${ref.tag}): ${ref.file.name}]\n${text}`);
+        } catch {
+          // Non-critical — skip unreadable reference files silently
+        }
+      }
+      const referencesText = referenceTexts.length > 0 ? referenceTexts.join("\n\n---\n\n") : "";
 
       const { data, error: fnError } = await supabase.functions.invoke("generate-application", {
         body: {
@@ -60,6 +85,7 @@ const Index = () => {
           resumeText,
           additionalContext: ts.additionalContext || "",
           supportingContext,
+          referencesText,
           referenceInfluence: ts.referenceInfluence,
           hasReferences: ts.references.length > 0,
         },
