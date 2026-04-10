@@ -176,7 +176,7 @@ Return ONLY valid JSON array, no markdown fencing.`;
       company: String(j.company || "Unknown").slice(0, 500),
       description: String(j.description || "").slice(0, 10000),
       location: String(j.location || "").slice(0, 255),
-      source: String(j.source || "Web Scrape").slice(0, 100),
+      source: String(source || j.source || "Web Scrape").slice(0, 100),
       source_url: String(j.source_url || formattedUrl).slice(0, 2000),
       career_track: j.career_track || "product-management",
       seniority: String(j.seniority || "").slice(0, 100),
