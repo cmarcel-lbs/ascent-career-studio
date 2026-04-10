@@ -25,7 +25,7 @@ import type { ApplicationStatus } from "@/types/jobs";
 interface Props {
   jobId: string;
   onBack: () => void;
-  onNavigateToStudio: (jobDescription?: string) => void;
+  onNavigateToStudio: (jobDescription?: string, mode?: "resume" | "cover-letter") => void;
 }
 
 const STATUS_OPTIONS: { value: ApplicationStatus; label: string }[] = [
@@ -126,11 +126,11 @@ export function JobDetailPage({ jobId, onBack, onNavigateToStudio }: Props) {
 
       {/* Actions */}
       <div className="flex flex-wrap gap-2 mb-8">
-        <Button onClick={() => onNavigateToStudio(job.description)}>
+        <Button onClick={() => onNavigateToStudio(job.description, "resume")}>
           <FileText className="h-4 w-4 mr-2" />
           Tailor Resume
         </Button>
-        <Button variant="outline" onClick={() => onNavigateToStudio(job.description)}>
+        <Button variant="outline" onClick={() => onNavigateToStudio(job.description, "cover-letter")}>
           <Mail className="h-4 w-4 mr-2" />
           Generate Cover Letter
         </Button>
