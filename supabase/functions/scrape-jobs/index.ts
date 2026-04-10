@@ -12,7 +12,7 @@ Deno.serve(async (req) => {
   }
 
   try {
-    const { url, preferredTracks } = await req.json();
+    const { url, source, preferredTracks } = await req.json();
 
     if (!url || typeof url !== "string") {
       return new Response(
