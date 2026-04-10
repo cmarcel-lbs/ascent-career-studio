@@ -10,6 +10,7 @@ import {
   LogOut,
   ChevronLeft,
   ChevronRight,
+  ClipboardList,
 } from "lucide-react";
 import { Button } from "@/components/ui/button";
 import { ScrollArea } from "@/components/ui/scroll-area";
@@ -20,12 +21,14 @@ import { JobDetailPage } from "@/components/jobs/JobDetailPage";
 import { ProfilePage } from "@/components/profile/ProfilePage";
 import { ResumesPage } from "@/components/resumes/ResumesPage";
 import { StudioPage } from "@/components/studio/StudioPage";
+import { TrackerPage } from "@/components/tracker/TrackerPage";
 
-type Page = "dashboard" | "jobs" | "job-detail" | "profile" | "resumes" | "studio";
+type Page = "dashboard" | "jobs" | "job-detail" | "profile" | "resumes" | "studio" | "tracker";
 
 const NAV_ITEMS = [
   { id: "dashboard" as Page, label: "Dashboard", icon: LayoutDashboard },
   { id: "jobs" as Page, label: "Jobs", icon: Briefcase },
+  { id: "tracker" as Page, label: "Tracker", icon: ClipboardList },
   { id: "studio" as Page, label: "Studio", icon: FileText },
   { id: "resumes" as Page, label: "Resumes", icon: FolderOpen },
   { id: "profile" as Page, label: "Profile", icon: User },
@@ -69,6 +72,8 @@ export function AppLayout() {
         return <ResumesPage />;
       case "studio":
         return <StudioPage />;
+      case "tracker":
+        return <TrackerPage onNavigateToJob={navigateToJob} />;
       default:
         return <DashboardPage onNavigateToJobs={navigateToJobs} onNavigateToJob={navigateToJob} />;
     }
