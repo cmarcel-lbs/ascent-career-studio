@@ -38,6 +38,7 @@ export function JobsFeedPage({ onNavigateToJob, onNavigateToStudio }: Props) {
   const [showImportDialog, setShowImportDialog] = useState(false);
   const [importUrl, setImportUrl] = useState("");
   const [importing, setImporting] = useState(false);
+  const [importSource, setImportSource] = useState("auto");
 
   const handleImportFromUrl = useCallback(async () => {
     if (!importUrl.trim()) return;
@@ -46,6 +47,7 @@ export function JobsFeedPage({ onNavigateToJob, onNavigateToStudio }: Props) {
       const { data, error } = await supabase.functions.invoke("scrape-jobs", {
         body: {
           url: importUrl,
+          source: importSource === "auto" ? undefined : importSource,
           preferredTracks: profile?.preferred_career_tracks || [],
         },
       });
@@ -350,6 +352,27 @@ export function JobsFeedPage({ onNavigateToJob, onNavigateToStudio }: Props) {
           </DialogHeader>
           <div className="space-y-4 pt-2">
             <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">Source / Board Type</label>
+              <Select value={importSource} onValueChange={setImportSource}>
+                <SelectTrigger className="h-9 text-xs">
+                  <SelectValue placeholder="Select source type" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="auto">Auto-detect</SelectItem>
+                  <SelectItem value="LinkedIn">LinkedIn</SelectItem>
+                  <SelectItem value="Indeed">Indeed</SelectItem>
+                  <SelectItem value="Greenhouse">Greenhouse</SelectItem>
+                  <SelectItem value="Lever">Lever</SelectItem>
+                  <SelectItem value="Workday">Workday</SelectItem>
+                  <SelectItem value="Company Website">Company Website</SelectItem>
+                  <SelectItem value="AngelList">AngelList / Wellfound</SelectItem>
+                  <SelectItem value="Glassdoor">Glassdoor</SelectItem>
+                  <SelectItem value="Other">Other</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="space-y-1.5">
+              <label className="text-xs font-medium text-foreground">URL</label>
               <div className="relative">
                 <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
@@ -360,9 +383,6 @@ export function JobsFeedPage({ onNavigateToJob, onNavigateToStudio }: Props) {
                   className="pl-10 font-mono text-xs"
                 />
               </div>
-              <p className="text-[11px] text-muted-foreground">
-                Works with LinkedIn, Indeed, Greenhouse, Lever, company career pages, and more.
-              </p>
             </div>
             <div className="bg-muted/50 rounded-lg p-3 text-[11px] text-muted-foreground space-y-1">
               <p className="font-medium text-foreground">Tips for best results:</p>
