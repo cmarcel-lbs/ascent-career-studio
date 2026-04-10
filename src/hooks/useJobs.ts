@@ -12,20 +12,35 @@ export function useJobs() {
   const [applications, setApplications] = useState<JobApplication[]>([]);
   const [loading, setLoading] = useState(true);
 
+  const [fetchError, setFetchError] = useState<string | null>(null);
+
   const fetchAll = useCallback(async () => {
     if (!user) return;
     setLoading(true);
+    setFetchError(null);
 
-    const [jobsRes, savedRes, appsRes] = await Promise.all([
-      supabase.from("jobs").select("*").order("posted_date", { ascending: false }),
-      supabase.from("saved_jobs").select("*").eq("user_id", user.id),
-      supabase.from("job_applications").select("*").eq("user_id", user.id),
-    ]);
+    try {
+      const [jobsRes, savedRes, appsRes] = await Promise.all([
+        supabase.from("jobs").select("*").order("posted_date", { ascending: false }),
+        supabase.from("saved_jobs").select("*").eq("user_id", user.id),
+        supabase.from("job_applications").select("*").eq("user_id", user.id),
+      ]);
 
-    if (jobsRes.data) setJobs(jobsRes.data as Job[]);
-    if (savedRes.data) setSavedJobs(savedRes.data as SavedJob[]);
-    if (appsRes.data) setApplications(appsRes.data as JobApplication[]);
-    setLoading(false);
+      if (jobsRes.error) throw new Error(`Jobs: ${jobsRes.error.message}`);
+      if (savedRes.error) throw new Error(`Saved jobs: ${savedRes.error.message}`);
+      if (appsRes.error) throw new Error(`Applications: ${appsRes.error.message}`);
+
+      setJobs(jobsRes.data as Job[]);
+      setSavedJobs(savedRes.data as SavedJob[]);
+      setApplications(appsRes.data as JobApplication[]);
+    } catch (err) {
+      const msg = err instanceof Error ? err.message : "Failed to load jobs";
+      setFetchError(msg);
+      console.error("useJobs fetchAll error:", err);
+      toast.error("Failed to load jobs. Please refresh.");
+    } finally {
+      setLoading(false);
+    }
   }, [user]);
 
   useEffect(() => {
@@ -116,5 +131,5 @@ export function useJobs() {
     [jobs, savedJobs, enrichJobs]
   );
 
-  return { jobs, savedJobs, applications, loading, saveJob, updateApplication, filterJobs, enrichJobs, refetch: fetchAll };
+  return { jobs, savedJobs, applications, loading, fetchError, saveJob, updateApplication, filterJobs, enrichJobs, refetch: fetchAll };
 }
