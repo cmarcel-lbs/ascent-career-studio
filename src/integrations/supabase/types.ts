@@ -53,6 +53,211 @@ export type Database = {
         }
         Relationships: []
       }
+      job_applications: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string
+          notes: string | null
+          status: string
+          tailored_cover_letter: string | null
+          tailored_resume: string | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id: string
+          notes?: string | null
+          status?: string
+          tailored_cover_letter?: string | null
+          tailored_resume?: string | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string
+          notes?: string | null
+          status?: string
+          tailored_cover_letter?: string | null
+          tailored_resume?: string | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "job_applications_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      jobs: {
+        Row: {
+          career_track: string
+          company: string
+          created_at: string
+          description: string
+          id: string
+          keywords: string[] | null
+          location: string | null
+          posted_date: string | null
+          salary_range: string | null
+          seniority: string | null
+          source: string | null
+          source_url: string | null
+          title: string
+          work_mode: string | null
+        }
+        Insert: {
+          career_track: string
+          company: string
+          created_at?: string
+          description?: string
+          id?: string
+          keywords?: string[] | null
+          location?: string | null
+          posted_date?: string | null
+          salary_range?: string | null
+          seniority?: string | null
+          source?: string | null
+          source_url?: string | null
+          title: string
+          work_mode?: string | null
+        }
+        Update: {
+          career_track?: string
+          company?: string
+          created_at?: string
+          description?: string
+          id?: string
+          keywords?: string[] | null
+          location?: string | null
+          posted_date?: string | null
+          salary_range?: string | null
+          seniority?: string | null
+          source?: string | null
+          source_url?: string | null
+          title?: string
+          work_mode?: string | null
+        }
+        Relationships: []
+      }
+      profiles: {
+        Row: {
+          created_at: string
+          excluded_job_types: string[] | null
+          hard_skills: string[] | null
+          id: string
+          preferred_career_tracks: string[] | null
+          preferred_functions: string[] | null
+          summary: string | null
+          target_industries: string[] | null
+          target_locations: string[] | null
+          target_seniority: string[] | null
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          excluded_job_types?: string[] | null
+          hard_skills?: string[] | null
+          id?: string
+          preferred_career_tracks?: string[] | null
+          preferred_functions?: string[] | null
+          summary?: string | null
+          target_industries?: string[] | null
+          target_locations?: string[] | null
+          target_seniority?: string[] | null
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          excluded_job_types?: string[] | null
+          hard_skills?: string[] | null
+          id?: string
+          preferred_career_tracks?: string[] | null
+          preferred_functions?: string[] | null
+          summary?: string | null
+          target_industries?: string[] | null
+          target_locations?: string[] | null
+          target_seniority?: string[] | null
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      resumes: {
+        Row: {
+          career_track: string | null
+          content: string
+          created_at: string
+          file_name: string
+          id: string
+          is_master: boolean
+          updated_at: string
+          user_id: string
+        }
+        Insert: {
+          career_track?: string | null
+          content?: string
+          created_at?: string
+          file_name: string
+          id?: string
+          is_master?: boolean
+          updated_at?: string
+          user_id: string
+        }
+        Update: {
+          career_track?: string | null
+          content?: string
+          created_at?: string
+          file_name?: string
+          id?: string
+          is_master?: boolean
+          updated_at?: string
+          user_id?: string
+        }
+        Relationships: []
+      }
+      saved_jobs: {
+        Row: {
+          created_at: string
+          id: string
+          job_id: string
+          status: string
+          user_id: string
+        }
+        Insert: {
+          created_at?: string
+          id?: string
+          job_id: string
+          status?: string
+          user_id: string
+        }
+        Update: {
+          created_at?: string
+          id?: string
+          job_id?: string
+          status?: string
+          user_id?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "saved_jobs_job_id_fkey"
+            columns: ["job_id"]
+            isOneToOne: false
+            referencedRelation: "jobs"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
     }
     Views: {
       [_ in never]: never
