@@ -21,10 +21,22 @@ const TRACK_ICONS: Record<CareerTrack, React.ElementType> = {
   "growth-strategy": BarChart3,
 };
 
-export function StudioPage() {
+interface StudioPageProps {
+  prefillJobDescription?: string;
+  initialMode?: "resume" | "cover-letter";
+}
+
+export function StudioPage({ prefillJobDescription, initialMode = "resume" }: StudioPageProps) {
   const { state, activeTrack, activeState, setActiveTrack, updateTrack, resetTrack } = useWorkspaceState();
   const { versions, loading: versionsLoading, saveVersion, deleteVersion } = useVersionHistory();
   const [showHistory, setShowHistory] = useState(false);
+  const [prefillApplied, setPrefillApplied] = useState(false);
+
+  // Apply prefilled job description from job detail page — once, only if field is empty
+  if (prefillJobDescription && !prefillApplied && !activeState.jobDescription) {
+    updateTrack(activeTrack, { jobDescription: prefillJobDescription });
+    setPrefillApplied(true);
+  }
 
   const handleGenerate = useCallback(async () => {
     const track = activeTrack;
