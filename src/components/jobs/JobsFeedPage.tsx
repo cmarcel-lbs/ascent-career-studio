@@ -47,6 +47,7 @@ export function JobsFeedPage({ onNavigateToJob, onNavigateToStudio }: Props) {
       const { data, error } = await supabase.functions.invoke("scrape-jobs", {
         body: {
           url: importUrl,
+          source: importSource === "auto" ? undefined : importSource,
           preferredTracks: profile?.preferred_career_tracks || [],
         },
       });
