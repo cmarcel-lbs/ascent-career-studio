@@ -35,7 +35,37 @@ export function JobsFeedPage({ onNavigateToJob, onNavigateToStudio }: Props) {
   const [viewMode, setViewMode] = useState<"list" | "board">("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [searching, setSearching] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importUrl, setImportUrl] = useState("");
+  const [importing, setImporting] = useState(false);
 
+  const handleImportFromUrl = useCallback(async () => {
+    if (!importUrl.trim()) return;
+    setImporting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("scrape-jobs", {
+        body: {
+          url: importUrl,
+          preferredTracks: profile?.preferred_career_tracks || [],
+        },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      const count = data?.jobsAdded || 0;
+      if (count === 0) {
+        toast.info("No job listings found on that page. Try a different URL.");
+      } else {
+        toast.success(`Imported ${count} job${count !== 1 ? "s" : ""} from the page`);
+      }
+      setImportUrl("");
+      setShowImportDialog(false);
+      await refetch();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Import failed");
+    } finally {
+      setImporting(false);
+    }
+  }, [importUrl, profile, refetch]);
   const filteredJobs = useMemo(() => {
     const filtered = filterJobs(filters);
     return filtered.map((j) => ({
