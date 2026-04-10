@@ -72,6 +72,8 @@ export function AppLayout() {
         return <ResumesPage />;
       case "studio":
         return <StudioPage />;
+      case "tracker":
+        return <TrackerPage onNavigateToJob={navigateToJob} />;
       default:
         return <DashboardPage onNavigateToJobs={navigateToJobs} onNavigateToJob={navigateToJob} />;
     }
