@@ -11,7 +11,14 @@ import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Tabs, TabsContent, TabsList, TabsTrigger } from "@/components/ui/tabs";
-import { Bookmark, EyeOff, ExternalLink, FileText, ArrowRight, Search, Loader2, LayoutGrid, List } from "lucide-react";
+import {
+  Dialog,
+  DialogContent,
+  DialogHeader,
+  DialogTitle,
+  DialogDescription,
+} from "@/components/ui/dialog";
+import { Bookmark, EyeOff, ExternalLink, FileText, ArrowRight, Search, Loader2, LayoutGrid, List, Globe, LinkIcon } from "lucide-react";
 import { supabase } from "@/integrations/supabase/client";
 import { toast } from "sonner";
 
@@ -28,7 +35,37 @@ export function JobsFeedPage({ onNavigateToJob, onNavigateToStudio }: Props) {
   const [viewMode, setViewMode] = useState<"list" | "board">("list");
   const [searchQuery, setSearchQuery] = useState("");
   const [searching, setSearching] = useState(false);
+  const [showImportDialog, setShowImportDialog] = useState(false);
+  const [importUrl, setImportUrl] = useState("");
+  const [importing, setImporting] = useState(false);
 
+  const handleImportFromUrl = useCallback(async () => {
+    if (!importUrl.trim()) return;
+    setImporting(true);
+    try {
+      const { data, error } = await supabase.functions.invoke("scrape-jobs", {
+        body: {
+          url: importUrl,
+          preferredTracks: profile?.preferred_career_tracks || [],
+        },
+      });
+      if (error) throw new Error(error.message);
+      if (data?.error) throw new Error(data.error);
+      const count = data?.jobsAdded || 0;
+      if (count === 0) {
+        toast.info("No job listings found on that page. Try a different URL.");
+      } else {
+        toast.success(`Imported ${count} job${count !== 1 ? "s" : ""} from the page`);
+      }
+      setImportUrl("");
+      setShowImportDialog(false);
+      await refetch();
+    } catch (err) {
+      toast.error(err instanceof Error ? err.message : "Import failed");
+    } finally {
+      setImporting(false);
+    }
+  }, [importUrl, profile, refetch]);
   const filteredJobs = useMemo(() => {
     const filtered = filterJobs(filters);
     return filtered.map((j) => ({
@@ -168,6 +205,10 @@ export function JobsFeedPage({ onNavigateToJob, onNavigateToStudio }: Props) {
           <h1 className="text-3xl font-semibold text-foreground mb-1">Jobs</h1>
           <p className="text-sm text-muted-foreground">{sortedJobs.length} jobs across all tracks</p>
         </div>
+        <Button variant="outline" size="sm" className="gap-1.5" onClick={() => setShowImportDialog(true)}>
+          <Globe className="h-3.5 w-3.5" />
+          Import from URL
+        </Button>
       </div>
 
       {/* Search Bar */}
@@ -297,6 +338,59 @@ export function JobsFeedPage({ onNavigateToJob, onNavigateToStudio }: Props) {
           ))}
         </div>
       )}
+
+      {/* Import from URL Dialog */}
+      <Dialog open={showImportDialog} onOpenChange={setShowImportDialog}>
+        <DialogContent className="max-w-md">
+          <DialogHeader>
+            <DialogTitle>Import Jobs from URL</DialogTitle>
+            <DialogDescription>
+              Paste a job board or career page URL to scrape and import real job listings.
+            </DialogDescription>
+          </DialogHeader>
+          <div className="space-y-4 pt-2">
+            <div className="space-y-1.5">
+              <div className="relative">
+                <LinkIcon className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
+                <Input
+                  placeholder="https://boards.greenhouse.io/company or LinkedIn jobs URL..."
+                  value={importUrl}
+                  onChange={(e) => setImportUrl(e.target.value)}
+                  onKeyDown={(e) => e.key === "Enter" && handleImportFromUrl()}
+                  className="pl-10 font-mono text-xs"
+                />
+              </div>
+              <p className="text-[11px] text-muted-foreground">
+                Works with LinkedIn, Indeed, Greenhouse, Lever, company career pages, and more.
+              </p>
+            </div>
+            <div className="bg-muted/50 rounded-lg p-3 text-[11px] text-muted-foreground space-y-1">
+              <p className="font-medium text-foreground">Tips for best results:</p>
+              <p>• Use search results pages with multiple listings</p>
+              <p>• Company career pages (e.g. greenhouse.io/company)</p>
+              <p>• Individual job posting URLs also work</p>
+            </div>
+            <div className="flex gap-2 justify-end">
+              <Button variant="ghost" size="sm" onClick={() => setShowImportDialog(false)}>
+                Cancel
+              </Button>
+              <Button size="sm" onClick={handleImportFromUrl} disabled={importing || !importUrl.trim()}>
+                {importing ? (
+                  <>
+                    <Loader2 className="h-3.5 w-3.5 mr-1.5 animate-spin" />
+                    Scraping...
+                  </>
+                ) : (
+                  <>
+                    <Globe className="h-3.5 w-3.5 mr-1.5" />
+                    Import Jobs
+                  </>
+                )}
+              </Button>
+            </div>
+          </div>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
